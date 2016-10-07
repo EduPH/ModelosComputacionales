@@ -1,7 +1,11 @@
 
 module GOTO where
 
--- El tipo de dato variable.
+-- El lenguaje GOTO es un modelo secuencial, determinista con conjunto
+-- de datos en los naturales.
+
+
+-- El tipo de dato variable
 type Nombre = String
 type Indice = [Int]
 type Valor = Int
@@ -15,9 +19,7 @@ showInts []      = ""
 showInts [i]     = show i
 showInts (i:is') = show i ++ "_" ++ showInts is'
 
--- Las variables de entradas siempre serán denotadas por la letra X, la
--- de salida por la letra Y y las de trabajo por la letra Z.
--- Representación:
+-- Representación
 instance Show Variable where
   show ( VarIn [] i)    = "X" 
   show ( VarIn [i] j)   = "X" ++ show i
@@ -31,11 +33,10 @@ valor :: Variable -> Valor
 valor (VarIn i v) = v
 valor (VarOut v) = v
 valor (VarWork i v) = v
-
--- Como los valores iniciales de la variable de salida y las de trabajo son siempre es 0, las
+-- Como el valor inicial de la variable de salida siempre es 0, la
 -- definimos previamente.
 y = VarOut 0
-z = VarWork [] 0
+
 
 -- Definimos las instrucciones
 
