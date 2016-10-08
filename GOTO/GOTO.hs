@@ -11,6 +11,7 @@ data Variable = VarIn Indice Valor
 
 
 -- Función auxiliar
+showInts :: Show a => [a] -> [Char]
 showInts []      = ""
 showInts [i]     = show i
 showInts (i:is') = show i ++ "_" ++ showInts is'
@@ -27,6 +28,7 @@ instance Show Variable where
   show ( VarWork [i] j) = "Z" ++ show i
   show ( VarWork is j)  = "Z" ++ showInts is
 
+-- Valor de la variable
 valor :: Variable -> Valor
 valor (VarIn i v) = v
 valor (VarOut v) = v
@@ -34,6 +36,8 @@ valor (VarWork i v) = v
 
 -- Como los valores iniciales de la variable de salida y las de trabajo son siempre es 0, las
 -- definimos previamente.
+
+y,z :: Variable
 y = VarOut 0
 z = VarWork [] 0
 
@@ -59,7 +63,7 @@ instance Show Instruccion where
                              (show 1)
      show (Decremento v []) = " "  ++show v++")" ++ "<-" ++ show v ++"-" ++
                              (show 1)
-     show (Decremento v l) = "["++l++"]" ++ " "  ++show v++")" ++ "<-" ++ show v ++"-" ++
+     show (Decremento v l) = "["++l++"]" ++ " "  ++show v ++ "<-" ++ show v ++"-" ++
                              (show 1)
      show (Condicional [] v l') =  " " ++ "IF" ++ " "  ++ show
                                  v ++ "/=" ++ (show      0)
@@ -80,7 +84,6 @@ instance Show Programa where
     show (Pr (i:is)) = (show i) ++ "\n" ++ (show (Pr is))
 
 -- Ejemplo de programa que calcula la función identidad
-
 -- λ> let x = VarIn [] 0
 -- λ> let z = VarWork [] 0
 -- λ> Pr [Condicional [] x "B", Incremento z [], Condicional [] z "E", Decremento x "B", Incremento y [], Condicional [] x "B"]
@@ -90,3 +93,28 @@ instance Show Programa where
 -- [B] X)<-X-1
 --  Y<-Y+1
 --  IF X/=0 GOTO [B]
+
+programaIdentidad :: Programa
+programaIdentidad = Pr [Condicional [] (VarIn [] 0) "B", 
+                        Incremento z [], Condicional [] z "E", 
+                        Decremento (VarIn [] 0) "B", 
+                        Incremento y [], 
+                        Condicional [] (VarIn [] 0) "B"]
+
+-- Cambio del valor de una variable
+cambiaVal :: Variable -> Valor -> Variable
+cambiaVal (VarIn i v) v' =   VarIn i v'
+cambiaVal (VarOut v) v' = VarOut v'
+cambiaVal (VarWork i v) v' = VarWork i v'
+
+
+-- Devuelve la etiqueta de una instrucción
+etiqueta :: Instruccion -> Etiqueta
+etiqueta (Decremento v l) = l
+etiqueta (Incremento v l) = l
+etiqueta (Condicional l v l') = l
+
+-- Búsqueda de una instrucción con una etiqueta dada
+buscaI :: Programa -> Etiqueta -> Instruccion
+buscaI (Pr is) e = head  [i | i<- is, etiqueta i == e]
+
