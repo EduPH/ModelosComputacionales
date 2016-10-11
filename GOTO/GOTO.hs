@@ -121,9 +121,10 @@ varInstruccion (Decremento v _) = v
 varInstruccion (Condicional _ v _) = v
 
 -- Búsqueda de una instrucción con una etiqueta dada
-buscaI :: Programa -> Etiqueta -> [Instruccion]
-buscaI (Pr is) e | null [i | i<- is, etiqueta i == e] = []
-                 | otherwise = [head [i | i<- is, etiqueta i == e]]
+buscaI :: Programa -> Etiqueta -> Int
+buscaI (Pr []) e = 0
+buscaI (Pr (i:is)) e | etiqueta i == e = 1
+                     | otherwise = 1+ buscaI (Pr is) e
 
 -- Diferenciar los condicionales del resto
 esIncDec :: Instruccion -> Bool
@@ -137,17 +138,31 @@ valorP v xs = head [valor x | x <- xs, (fst x) ==v]
 
 
 -- Ejecución en proceso: 
+suma1 v [] = []
+suma1 v (x':xs) | fst x' == v = (cambiaVal x' (valor x' +1)):xs
+                | otherwise = x': (suma1 v xs)
+
+resta1 v [] = []
+resta1 v (x':xs) | fst x' == v = (cambiaVal x' (valor x' -1)):xs
+                 | otherwise = x': (resta1 v xs)
+
+salida xs = head [v | v <- xs, fst v == VarOut]
 
 
-ejecuta1 i@(Incremento v _) (x:xs) | fst x == v = (cambiaVal x (valor x +1)):xs
-                                   | otherwise = x: ejecuta1 i xs
-
-ejecuta1 i@(Decremento v _) (x:xs) | fst x == v = (cambiaVal x (valor x -1)):xs
-                                   | otherwise = x: ejecuta1 i xs
-
-ejecuta2  n (Pr is) xs | esIncDec (is!! n) = ejecuta1 (is!! n) xs
-                       | otherwise = ejecuta3 (is!! n) (Pr is) xs
-
-ejecuta3 (Condicional l v l') p@(Pr is) xs 
-    | (valorP v xs /= 0)  && (buscaI p l' /= []) = undefined
-ejecuta (Pr is) xs = undefined
+ejecuta n p@(Pr is) xs = aux (is !! (n-1))
+    where 
+      aux (Incremento v e) | n < length is =  ejecuta (n+1) p (suma1
+                                                                  v xs)
+                           | otherwise = salida xs
+      aux (Decremento v e) | n < length is =  ejecuta (n+1) p (resta1
+                                                                  v xs)
+                           | otherwise = salida xs
+      
+      aux (Condicional e v e') | valorP v xs /= 0 =  ejecuta (buscaI p e') p xs
+                               | e' == "E" = salida xs
+                               | otherwise = if (n < length is) then
+                                                 ejecuta (n+1) p xs else
+                                                 (salida xs)
+                                                 
+     
+ejecutaP p xs = ejecuta 1 xs
