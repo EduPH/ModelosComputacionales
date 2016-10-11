@@ -5,10 +5,11 @@ module GOTO where
 type Nombre = String
 type Indice = [Int]
 type Valor = Int
-data Variable = VarIn Indice Valor
-              | VarOut Valor
-              | VarWork Indice Valor
-
+data Variable = VarIn Indice 
+              | VarOut 
+              | VarWork Indice 
+                deriving Eq
+type Estado =  (Variable, Valor)
 
 -- Función auxiliar
 showInts :: Show a => [a] -> [Char]
@@ -20,27 +21,25 @@ showInts (i:is') = show i ++ "_" ++ showInts is'
 -- de salida por la letra Y y las de trabajo por la letra Z.
 -- Representación:
 instance Show Variable where
-  show ( VarIn [] i)    = "X" 
-  show ( VarIn [i] j)   = "X" ++ show i
-  show ( VarIn is j)    = "X" ++ showInts is
-  show ( VarOut i)      = "Y" 
-  show ( VarWork [] i)  = "Z" 
-  show ( VarWork [i] j) = "Z" ++ show i
-  show ( VarWork is j)  = "Z" ++ showInts is
+  show ( VarIn [] )    = "X" 
+  show ( VarIn [i])   = "X" ++ show i
+  show ( VarIn is)    = "X" ++ showInts is
+  show ( VarOut  )      = "Y" 
+  show ( VarWork [])  = "Z" 
+  show ( VarWork [i]) = "Z" ++ show i
+  show ( VarWork is)  = "Z" ++ showInts is
 
 -- Valor de la variable
-valor :: Variable -> Valor
-valor (VarIn i v) = v
-valor (VarOut v) = v
-valor (VarWork i v) = v
+valor :: Estado -> Valor
+valor (VarIn i,v) = v
+valor (VarOut, v) = v
+valor (VarWork i, v) = v
 
--- Como los valores iniciales de la variable de salida y las de trabajo son siempre es 0, las
--- definimos previamente.
 
 y,z :: Variable
-y = VarOut 0
-z = VarWork [] 0
-
+y = VarOut 
+z = VarWork [] 
+x = VarIn []
 -- Definimos las instrucciones
 
 type Etiqueta = String
@@ -48,6 +47,7 @@ type Etiqueta = String
 data Instruccion =  Incremento Variable Etiqueta
                   | Decremento Variable Etiqueta
                   | Condicional Etiqueta Variable Etiqueta
+                    deriving Eq
 
 
 
@@ -95,18 +95,17 @@ instance Show Programa where
 --  IF X/=0 GOTO [B]
 
 programaIdentidad :: Programa
-programaIdentidad = Pr [Condicional [] (VarIn [] 0) "B", 
+programaIdentidad = Pr [Condicional [] x "B", 
                         Incremento z [], Condicional [] z "E", 
-                        Decremento (VarIn [] 0) "B", 
+                        Decremento x "B", 
                         Incremento y [], 
-                        Condicional [] (VarIn [] 0) "B"]
+                        Condicional [] x "B"]
 
 -- Cambio del valor de una variable
-cambiaVal :: Variable -> Valor -> Variable
-cambiaVal (VarIn i v) v' =   VarIn i v'
-cambiaVal (VarOut v) v' = VarOut v'
-cambiaVal (VarWork i v) v' = VarWork i v'
-
+cambiaVal :: Estado -> Valor -> Estado
+cambiaVal (VarIn i, v) v' =   (VarIn i,v')
+cambiaVal (VarOut, v) v' = (VarOut, v')
+cambiaVal (VarWork i, v) v' = (VarWork i, v')
 
 -- Devuelve la etiqueta de una instrucción
 etiqueta :: Instruccion -> Etiqueta
@@ -114,7 +113,41 @@ etiqueta (Decremento v l) = l
 etiqueta (Incremento v l) = l
 etiqueta (Condicional l v l') = l
 
--- Búsqueda de una instrucción con una etiqueta dada
-buscaI :: Programa -> Etiqueta -> Instruccion
-buscaI (Pr is) e = head  [i | i<- is, etiqueta i == e]
+-- Obtener la variable de una instrucción
 
+varInstruccion :: Instruccion -> Variable
+varInstruccion (Incremento v _) = v
+varInstruccion (Decremento v _) = v
+varInstruccion (Condicional _ v _) = v
+
+-- Búsqueda de una instrucción con una etiqueta dada
+buscaI :: Programa -> Etiqueta -> [Instruccion]
+buscaI (Pr is) e | null [i | i<- is, etiqueta i == e] = []
+                 | otherwise = [head [i | i<- is, etiqueta i == e]]
+
+-- Diferenciar los condicionales del resto
+esIncDec :: Instruccion -> Bool
+esIncDec (Incremento _ _) = True
+esIncDec (Decremento _ _) = True
+esIncDec _ = False
+
+-- Valor de una variable en la lista de estados
+valorP :: Variable -> [Estado] -> Valor
+valorP v xs = head [valor x | x <- xs, (fst x) ==v]
+
+
+-- Ejecución en proceso: 
+
+
+ejecuta1 i@(Incremento v _) (x:xs) | fst x == v = (cambiaVal x (valor x +1)):xs
+                                   | otherwise = x: ejecuta1 i xs
+
+ejecuta1 i@(Decremento v _) (x:xs) | fst x == v = (cambiaVal x (valor x -1)):xs
+                                   | otherwise = x: ejecuta1 i xs
+
+ejecuta2  n (Pr is) xs | esIncDec (is!! n) = ejecuta1 (is!! n) xs
+                       | otherwise = ejecuta3 (is!! n) (Pr is) xs
+
+ejecuta3 (Condicional l v l') p@(Pr is) xs 
+    | (valorP v xs /= 0)  && (buscaI p l' /= []) = undefined
+ejecuta (Pr is) xs = undefined
