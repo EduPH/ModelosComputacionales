@@ -29,19 +29,19 @@ instance Show Variable where
   show ( VarWork [i]) = "Z" ++ show i
   show ( VarWork is)  = "Z" ++ showInts is
 
--- Valor de la variable
+-- Valor de la variable en un estado
 valor :: Estado -> Valor
 valor (VarIn i,v) = v
 valor (VarOut, v) = v
 valor (VarWork i, v) = v
 
-
+-- Definimos variables para facilitar su uso
 y,z :: Variable
 y = VarOut 
 z = VarWork [] 
 x = VarIn []
--- Definimos las instrucciones
 
+-- Definimos las instrucciones
 type Etiqueta = String
  
 data Instruccion =  Incremento Variable Etiqueta
@@ -73,27 +73,15 @@ instance Show Instruccion where
                                                                      0)
                               ++" "++ "GOTO" ++" " ++ "[" ++ l'++"]"
 
--- Ejemplo
--- λ> Incremento y "A"
--- [A] (Y=0)<-(Y=0)+1
-
+-- Tipo de dato para una lista de instrucciones
 data Programa = Pr [Instruccion]
 
+-- Representación del tipo de dato Programa
 instance Show Programa where
     show (Pr [i]) = show i
     show (Pr (i:is)) = (show i) ++ "\n" ++ (show (Pr is))
 
--- Ejemplo de programa que calcula la función identidad
--- λ> let x = VarIn [] 0
--- λ> let z = VarWork [] 0
--- λ> Pr [Condicional [] x "B", Incremento z [], Condicional [] z "E", Decremento x "B", Incremento y [], Condicional [] x "B"]
---  IF X/=0 GOTO [B]
---  Z<-Z+1
---  IF Z/=0 GOTO [E]
--- [B] X)<-X-1
---  Y<-Y+1
---  IF X/=0 GOTO [B]
-
+-- Ejemplo de programa que calcula la función identidad:
 programaIdentidad :: Programa
 programaIdentidad = Pr [Condicional [] x "B", 
                         Incremento z [], Condicional [] z "E", 
@@ -114,41 +102,38 @@ etiqueta (Incremento v l) = l
 etiqueta (Condicional l v l') = l
 
 -- Obtener la variable de una instrucción
-
 varInstruccion :: Instruccion -> Variable
 varInstruccion (Incremento v _) = v
 varInstruccion (Decremento v _) = v
 varInstruccion (Condicional _ v _) = v
 
--- Búsqueda de una instrucción con una etiqueta dada
+-- Búsqueda de la posición de una instrucción con una etiqueta dada
 buscaI :: Programa -> Etiqueta -> Int
 buscaI (Pr []) e = 0
 buscaI (Pr (i:is)) e | etiqueta i == e = 1
                      | otherwise = 1+ buscaI (Pr is) e
-
--- Diferenciar los condicionales del resto
-esIncDec :: Instruccion -> Bool
-esIncDec (Incremento _ _) = True
-esIncDec (Decremento _ _) = True
-esIncDec _ = False
 
 -- Valor de una variable en la lista de estados
 valorP :: Variable -> [Estado] -> Valor
 valorP v xs = head [valor x | x <- xs, (fst x) ==v]
 
 
--- Ejecución en proceso: 
+-- Funciones auxiliares para Incremento y Decremento: 
+suma1 :: Variable -> [(Variable, Valor)] -> [Estado]
 suma1 v [] = []
 suma1 v (x':xs) | fst x' == v = (cambiaVal x' (valor x' +1)):xs
                 | otherwise = x': (suma1 v xs)
-
+resta1 :: Variable -> [(Variable, Valor)] -> [Estado]
 resta1 v [] = []
 resta1 v (x':xs) | fst x' == v = (cambiaVal x' (valor x' -1)):xs
                  | otherwise = x': (resta1 v xs)
 
+
+-- Función para obtener la variable de salida
+salida :: [Estado] -> Estado
 salida xs = head [v | v <- xs, fst v == VarOut]
 
-
+-- Ejecución de programas:
 ejecuta n p@(Pr is) xs = aux (is !! (n-1))
     where 
       aux (Incremento v e) | n < length is =  ejecuta (n+1) p (suma1
