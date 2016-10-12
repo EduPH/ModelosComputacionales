@@ -16,7 +16,7 @@ El proyecto se encuentra en un estado completamente inicial.
 
 Como alumno de la asignatura de Ciencias de la computación impartida en la facultad de matemáticas pretendo tanto mi aprendizaje, como aportar código libre en este aspecto.
 
-## Lenguaje GOTO
+## Lenguaje GOTO [(Acceso a la carpeta GOTO)](https://github.com/EduPH/ModelosComputacionales/tree/master/GOTO)
 
 El lenguaje GOTO es un modelo secuencial, determinista con conjunto de datos en los naturales. Está compuesto por:
 1. Variables de tipo natural (de entrada, salida y trabajo)
