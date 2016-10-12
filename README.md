@@ -7,7 +7,10 @@ Este proyecto pretende implementar distintos modelos computacionales en el lengu
 
 ## Estado del proyecto
 
-El proyecto se encuentra en un estado completamente inicial. Se ha empezado con la implementación del lenguaje GOTO (no acabado).
+El proyecto se encuentra en un estado completamente inicial. 
+
+### implementación del lenguaje GOTO
+### Ampliación de GOTO con macros (Pendiente)
 
 ## Motivación
 
