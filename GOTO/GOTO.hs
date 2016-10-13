@@ -81,14 +81,6 @@ instance Show Programa where
     show (Pr [i]) = show i
     show (Pr (i:is)) = (show i) ++ "\n" ++ (show (Pr is))
 
--- Ejemplo de programa que calcula la función identidad:
-programaIdentidad :: Programa
-programaIdentidad = Pr [Condicional [] x "B", 
-                        Incremento z [], Condicional [] z "E", 
-                        Decremento x "B", 
-                        Incremento y [], 
-                        Condicional [] x "B"]
-
 -- Cambio del valor de una variable
 cambiaVal :: Estado -> Valor -> Estado
 cambiaVal (VarIn i, v) v' =   (VarIn i,v')
@@ -138,13 +130,13 @@ ejecuta n p@(Pr is) xs = aux (is !! (n-1))
     where 
       aux (Incremento v e) | n < length is =  ejecuta (n+1) p (suma1
                                                                   v xs)
-                           | otherwise = salida xs
+                           | otherwise = salida (suma1 v xs)
       aux (Decremento v e) | n < length is =  ejecuta (n+1) p (resta1
                                                                   v xs)
-                           | otherwise = salida xs
+                           | otherwise = salida (resta1 v xs)
       
-      aux (Condicional e v e') | valorP v xs /= 0 =  ejecuta (buscaI p e') p xs
-                               | e' == "E" = salida xs
+      aux (Condicional e v e') | valorP v xs /= 0 && e'/= "E" =  ejecuta (buscaI p e') p xs
+                               | valorP v xs /= 0 && e'== "E" = salida xs
                                | otherwise = if (n < length is) then
                                                  ejecuta (n+1) p xs else
                                                  (salida xs)
