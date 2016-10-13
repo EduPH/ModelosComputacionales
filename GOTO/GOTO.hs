@@ -150,4 +150,5 @@ ejecuta n p@(Pr is) xs = aux (is !! (n-1))
                                                  (salida xs)
                                                  
      
-ejecutaP p xs = ejecuta 1 xs
+ejecutaP :: Programa -> [Estado] -> Estado
+ejecutaP p xs = ejecuta 1 p xs
