@@ -1,5 +1,6 @@
 
 module GOTO where
+import Data.List
 
 -- El tipo de dato variable.
 type Nombre = String
@@ -144,3 +145,8 @@ ejecuta n p@(Pr is) xs = aux (is !! (n-1))
      
 ejecutaP :: Programa -> [Estado] -> Estado
 ejecutaP p xs = ejecuta 1 p xs
+
+
+-- Lista de las variables de un programa
+variablesDe :: Programa -> [Variable]
+variablesDe (Pr ps) = nub (map (varInstruccion) ps)
