@@ -31,4 +31,4 @@ Futuro: Añadir macros.
 
 ## Simulador de máquinas de Turing (Pendiente)
 
-## Máquinas RAM
+## Máquinas RAM (Pendiente)
