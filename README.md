@@ -29,3 +29,6 @@ Se denota un programa como un conjunto de instrucciones.
 En proceso: Definición de tipos de datos, ejecución de los datos.
 Futuro: Añadir macros.
 
+## Simulador de máquinas de Turing (Pendiente)
+
+## Máquinas RAM
