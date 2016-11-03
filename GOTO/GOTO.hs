@@ -50,11 +50,6 @@ data Instruccion =  Incremento Variable Etiqueta
                   | Condicional Etiqueta Variable Etiqueta
                     deriving Eq
 
-
-
-
-
-
 -- Representación de las instrucciones:
 
 instance Show Instruccion where
@@ -62,7 +57,7 @@ instance Show Instruccion where
                              (show 1)
      show (Incremento v l)  = "["++l++"]" ++ " " ++ show v ++ "<-" ++show v ++"+" ++
                              (show 1)
-     show (Decremento v []) = " "  ++show v++")" ++ "<-" ++ show v ++"-" ++
+     show (Decremento v []) = " "  ++show v++" " ++ "<-" ++ show v ++"-" ++
                              (show 1)
      show (Decremento v l) = "["++l++"]" ++ " "  ++show v ++ "<-" ++ show v ++"-" ++
                              (show 1)
