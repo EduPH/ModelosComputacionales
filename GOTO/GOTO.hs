@@ -36,6 +36,17 @@ valor (VarIn i,v) = v
 valor (VarOut, v) = v
 valor (VarWork i, v) = v
 
+-- Caracterizamos las variables de trabajo
+esZ :: Variable -> Bool
+esZ (VarWork _) = True
+esZ _ = False
+
+-- Cálculo de índice de una variable
+indice :: Variable -> Int
+indice (VarWork []) = 0
+indice (VarWork [i]) = i
+indice (VarIn []) = 0
+indice (VarIn [i]) = i
 -- Definimos variables para facilitar su uso
 y,z :: Variable
 y = VarOut 
@@ -145,3 +156,6 @@ ejecutaP p xs = ejecuta 1 p xs
 -- Lista de las variables de un programa
 variablesDe :: Programa -> [Variable]
 variablesDe (Pr ps) = nub (map (varInstruccion) ps)
+
+listaVariablesDe :: Programa -> [Variable]
+listaVariablesDe (Pr ps) = map (varInstruccion) ps
