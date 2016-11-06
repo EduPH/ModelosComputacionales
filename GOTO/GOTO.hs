@@ -54,7 +54,8 @@ z = VarWork []
 x = VarIn []
 
 -- Definimos las instrucciones
-type Etiqueta = String
+data Etiqueta = E String Int
+                deriving Eq
  
 data Instruccion =  Incremento Variable Etiqueta
                   | Decremento Variable Etiqueta
@@ -63,22 +64,20 @@ data Instruccion =  Incremento Variable Etiqueta
 
 -- Representación de las instrucciones:
 
+instance Show Etiqueta where
+    show (E "" n) = "    "
+    show (E str 0) = "[" ++ str ++ "] "
+    show (E str n) = "["++ str ++ show n ++ "]"
+
 instance Show Instruccion where
-     show (Incremento v []) = " " ++ show v ++ "<-" ++show v ++"+" ++
+     show (Incremento v l)  = show l ++ " " ++ show v ++ "<-" ++show v ++"+" ++
                              (show 1)
-     show (Incremento v l)  = "["++l++"]" ++ " " ++ show v ++ "<-" ++show v ++"+" ++
+     show (Decremento v l) = show l ++ " "  ++show v ++ "<-" ++ show v ++"-" ++
                              (show 1)
-     show (Decremento v []) = " "  ++show v++" " ++ "<-" ++ show v ++"-" ++
-                             (show 1)
-     show (Decremento v l) = "["++l++"]" ++ " "  ++show v ++ "<-" ++ show v ++"-" ++
-                             (show 1)
-     show (Condicional [] v l') =  " " ++ "IF" ++ " "  ++ show
-                                 v ++ "/=" ++ (show      0)
-                              ++" "++ "GOTO" ++" " ++ "[" ++ l'++"]"
-     show (Condicional l v l') = "["++l++"]" ++ " " ++ "IF" ++ " "  ++ show
+     show (Condicional l v l') = show l ++ " " ++ "IF" ++ " "  ++ show
                                  v ++ "/=" ++ (show
                                                                      0)
-                              ++" "++ "GOTO" ++" " ++ "[" ++ l'++"]"
+                              ++" "++ "GOTO" ++" " ++ show l
 
 -- Tipo de dato para una lista de instrucciones
 data Programa = Pr [Instruccion]
@@ -132,6 +131,9 @@ resta1 v (x':xs) | fst x' == v = (cambiaVal x' (valor x' -1)):xs
 salida :: [Estado] -> Estado
 salida xs = head [v | v <- xs, fst v == VarOut]
 
+-- Etiqueta de salida
+etSalida (E "E" _) = True
+etSalida _ = False
 -- Ejecución de programas:
 ejecuta n p@(Pr is) xs = aux (is !! (n-1))
     where 
@@ -142,8 +144,8 @@ ejecuta n p@(Pr is) xs = aux (is !! (n-1))
                                                                   v xs)
                            | otherwise = salida (resta1 v xs)
       
-      aux (Condicional e v e') | valorP v xs /= 0 && e'/= "E" =  ejecuta (buscaI p e') p xs
-                               | valorP v xs /= 0 && e'== "E" = salida xs
+      aux (Condicional e v e') | valorP v xs /= 0 && etSalida e'  =  ejecuta (buscaI p e') p xs
+                               | valorP v xs /= 0 && etSalida e' = salida xs
                                | otherwise = if (n < length is) then
                                                  ejecuta (n+1) p xs else
                                                  (salida xs)
