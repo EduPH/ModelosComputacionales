@@ -99,6 +99,9 @@ etiqueta (Decremento v l) = l
 etiqueta (Incremento v l) = l
 etiqueta (Condicional l v l') = l
 
+-- Lista de etiquetas de un programa
+listaEtiquetas :: Programa -> [Etiqueta]
+listaEtiquetas (Pr is) = map (etiqueta) is
 -- Obtener la variable de una instrucción
 varInstruccion :: Instruccion -> Variable
 varInstruccion (Incremento v _) = v
