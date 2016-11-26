@@ -75,9 +75,8 @@ instance Show Instruccion where
      show (Decremento v l) = show l ++ " "  ++show v ++ "<-" ++ show v ++"-" ++
                              (show 1)
      show (Condicional l v l') = show l ++ " " ++ "IF" ++ " "  ++ show
-                                 v ++ "/=" ++ (show
-                                                                     0)
-                              ++" "++ "GOTO" ++" " ++ show l
+                                 v ++ "/=" ++ (show 0)
+                              ++" "++ "GOTO" ++" " ++ show l'
 
 -- Tipo de dato para una lista de instrucciones
 data Programa = Pr [Instruccion]
@@ -126,7 +125,10 @@ suma1 v (x':xs) | fst x' == v = (cambiaVal x' (valor x' +1)):xs
                 | otherwise = x': (suma1 v xs)
 resta1 :: Variable -> [(Variable, Valor)] -> [Estado]
 resta1 v [] = []
-resta1 v (x':xs) | fst x' == v = (cambiaVal x' (valor x' -1)):xs
+resta1 v (x':xs) | fst x' == v && valor x' /= 0 = (cambiaVal x' (valor
+                                                                 x'
+                                                                 -1)):xs
+                 | fst x' == v && valor x' == 0 = (x':xs)
                  | otherwise = x': (resta1 v xs)
 
 
@@ -147,7 +149,7 @@ ejecuta n p@(Pr is) xs = aux (is !! (n-1))
                                                                   v xs)
                            | otherwise = salida (resta1 v xs)
       
-      aux (Condicional e v e') | valorP v xs /= 0 && etSalida e'  =  ejecuta (buscaI p e') p xs
+      aux (Condicional e v e') | valorP v xs /= 0 && not ( etSalida e')  =  ejecuta (buscaI p e') p xs
                                | valorP v xs /= 0 && etSalida e' = salida xs
                                | otherwise = if (n < length is) then
                                                  ejecuta (n+1) p xs else

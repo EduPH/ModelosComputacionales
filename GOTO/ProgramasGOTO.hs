@@ -18,6 +18,13 @@ programaIndicadorDel0 = Pr [Condicional (E [] 0) x  (E "E" 0) ,
 -- λ> programaIndicadorDel0
 --      IF X/=0 GOTO     
 --      Y<-Y+1
+--
+
+-- Y <- X, siempre que X no sea 0.
+valorDeX :: Programa
+valorDeX = Pr [ Decremento x (E "A" 0),
+                Incremento y (E [] 0),
+                Condicional (E [] 0) x (E "A" 0)]
 
 -- Programa que calcula la función identidad
 programaIdentidad :: Programa
