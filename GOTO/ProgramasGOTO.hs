@@ -20,9 +20,12 @@ programaIndicadorDel0 = Pr [Condicional (E [] 0) x  (E "E" 0) ,
 --      Y<-Y+1
 --
 
--- Y <- X, siempre que X no sea 0.
+-- Y <- X
 valorDeX :: Programa
-valorDeX = Pr [ Decremento x (E "A" 0),
+valorDeX = Pr [ Condicional (E [] 0) x (E "A" 0),
+                Incremento z (E [] 0),
+                Condicional (E [] 0) z (E "E" 0),
+                Decremento x (E "A" 0),
                 Incremento y (E [] 0),
                 Condicional (E [] 0) x (E "A" 0)]
 
