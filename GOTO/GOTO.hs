@@ -113,6 +113,7 @@ buscaI (Pr []) e = 0
 buscaI (Pr (i:is)) e | etiqueta i == e = 1
                      | otherwise = 1+ buscaI (Pr is) e
 
+
 -- Valor de una variable en la lista de estados
 valorP :: Variable -> [Estado] -> Valor
 valorP v xs = head [valor x | x <- xs, (fst x) ==v]
@@ -137,8 +138,11 @@ salida :: [Estado] -> Estado
 salida xs = head [v | v <- xs, fst v == VarOut]
 
 -- Etiqueta de salida
-etSalida (E "E" _) = True
-etSalida _ = False
+
+etSalida :: Programa -> Etiqueta -> Bool
+etSalida (Pr []) e = True
+etSalida (Pr is) e = null [i | i<- is, etiqueta i == e]
+
 -- Ejecución de programas:
 ejecuta n p@(Pr is) xs = aux (is !! (n-1))
     where 
@@ -149,8 +153,8 @@ ejecuta n p@(Pr is) xs = aux (is !! (n-1))
                                                                   v xs)
                            | otherwise = salida (resta1 v xs)
       
-      aux (Condicional e v e') | valorP v xs /= 0 && not ( etSalida e')  =  ejecuta (buscaI p e') p xs
-                               | valorP v xs /= 0 && etSalida e' = salida xs
+      aux (Condicional e v e') | valorP v xs /= 0 && not ( etSalida p e')  =  ejecuta (buscaI p e') p xs
+                               | valorP v xs /= 0 && etSalida p e' = salida xs
                                | otherwise = if (n < length is) then
                                                  ejecuta (n+1) p xs else
                                                  (salida xs)
