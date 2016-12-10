@@ -48,3 +48,6 @@ normListPr :: [Programa] -> [Programa]
 normListPr ps = [actualizaVar u v | (u,v)<- p]
     where 
       p = zip ps (normalizaIndice (map (listaVariablesDe) ps))
+
+---------------------------------------------------------------
+
