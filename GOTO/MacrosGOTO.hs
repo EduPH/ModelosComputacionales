@@ -2,16 +2,21 @@ module MacrosGOTO where
 import GOTO
 import ProgramasGOTO
 
+-- * Implementación de macros
+-- ==========================
 type ProgramaM = [Programa]
 
--- Expansión de macros sin normalizar
+-- | Expansión de macros sin normalizar.
+
 expandeMacro :: ProgramaM -> Programa
 expandeMacro ((Pr is):ps) = Pr (is++ aux ps)
     where
       aux [] = []
       aux ((Pr ts):ps) = ts++ aux ps
 
--- Normalización de una lista de listas de variables ordenadas
+-- | Normalización de los índices de una lista de listas de variables
+-- ordenadas.
+
 normalizaIndice :: [[Variable]] -> [[Variable]]
 normalizaIndice [vs] = [vs]
 normalizaIndice (vs:(ts:vss)) = [vs] ++ normalizaIndice ((aux ts (maxIndice vs)):vss) 
@@ -21,7 +26,9 @@ normalizaIndice (vs:(ts:vss)) = [vs] ++ normalizaIndice ((aux ts (maxIndice vs))
       incIndice n v | esZ v = VarWork [(indice v)+n+1]
                     | otherwise = v
 
--- Dada una lista de variables ordenadas, asociarlas a un programa
+-- | Actualización de las variables de un programa a partir de una lista
+-- de variables ordenadas. 
+
 actualizaVar :: Programa -> [Variable] -> Programa
 actualizaVar (Pr is) vs = Pr (map (asocia) (zip is vs))
     where
@@ -29,13 +36,14 @@ actualizaVar (Pr is) vs = Pr (map (asocia) (zip is vs))
       asocia (Decremento _ e,v) = Decremento v e
       asocia (Condicional e1 _ e2,v) = Condicional e1 v e2
 
--- Normalización de etiquetas
+-- | Normalización de etiquetas
 
 normalizaEtiqueta :: [Programa] -> [Programa]
 normalizaEtiqueta = undefined -- Pendiente
 
--- Normalización de una lista de programas (Falta añadir normalización
+-- | Normalización de una lista de programas (Falta añadir normalización
 -- de etiquetas)
+
 normListPr :: [Programa] -> [Programa]
 normListPr ps = [actualizaVar u v | (u,v)<- p]
     where 
