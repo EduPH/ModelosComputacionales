@@ -1,10 +1,9 @@
 
+module GOTO where
+import Data.List
 
 -- * Implementación del lenguaje GOTO
 -- ==================================
-
-module GOTO where
-import Data.List
 
 -- | Se definen los distintos tipos de datos que conforman las
 -- variables. Una variable puede ser de entrada, salida o de trabajo, y
