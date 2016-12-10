@@ -167,11 +167,19 @@ etiquetaM (DecM _ e) = [e]
 etiquetaM (CondM e1 _ e2) = [e1,e2]
 etiquetaM (Macro _ is) = concat (map (etiquetaM) is)
 
+-- | La función (indexEt e) devuelve el índice de la etiqueta e.
+
 indexEt :: Etiqueta -> Int
 indexEt (E _ n) = n
 
+-- | La función (maxIndexEt es) calcula el máximo índice de las
+-- etiquetas de una listas de etiquetas. 
+
 maxIndexEt :: [Etiqueta] -> Int
 maxIndexEt es = maximum [indexEt e | e <- es]
+
+-- | La función (normalizaIndicesEt n i)  es la normalización de los
+-- índices de las etiquetas de i.
 
 normalizaIndicesEt n i = undefined -- Pendiente
 
@@ -181,5 +189,5 @@ normEtPm (Pm is) = Pm (aux n is)
       n = maxIndexEt (concat (map (etiquetaM) is))
       aux n [] = [] 
       aux n (i:is) | esM i = (normalizaIndicesEt n i): 
-                             (aux (maximoInd [normalizaIndicesEt n i]+1) is)
+                             (aux (maxIndexEt [normalizaIndicesEt n i]+1) is)
                    | otherwise = i: (aux n is)
