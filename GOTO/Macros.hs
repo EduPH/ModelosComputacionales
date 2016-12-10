@@ -73,7 +73,7 @@ valV v v' e = Macro e [CondM (E "A" 0) v' (E "B" 0),
 -- * Normalización de macros
 -- =========================
 
--- * Normalización de índices de variables de trabajo
+-- ** Normalización de índices de variables de trabajo
 -- ==================================================
 
 -- | La función (susVar v v1 i) sustituye la variable v1 por v en la
@@ -158,7 +158,7 @@ normalizaIndPm (Pm is) = Pm (aux n is)
                              (aux (maximoInd [normalizaIndices n i]+1) is)
                    | otherwise = i: (aux n is)
 
--- * Normalización etiquetas
+-- ** Normalización etiquetas
 -- =========================
 
 -- | La función (etiquetaM i) devuelve la lista de las etiquetas de la
