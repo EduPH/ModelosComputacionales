@@ -140,23 +140,46 @@ esM :: InstM -> Bool
 esM (Macro _ _) = True
 esM _ = False
 
--- | La función (normIndPm xs pm) normaliza los índices de las variables
--- de trabajo de las macros del programa pm. Emplea un acumulador xs 
+-- | La función (maximoInd is) calcula el índice mayor de las variables
+-- de trabajo de la lista de instrucciones is.
 
-normIndPm :: [InstM] -> ProgramaM -> [InstM]
-normIndPm _ (Pm []) = []
-normIndPm  xs (Pm (i:is)) 
-    | esM i = (normalizaIndices (maximum (map (indice) (varTrab xs))+1)
-               i): (normIndPm [(normalizaIndices 
-                                (maximum (map (indice) (varTrab xs)))
-                                i)]
-                    (Pm is) )
-    | otherwise = i: (normIndPm (i:xs) (Pm is))
+maximoInd :: [InstM] -> Int
+maximoInd is = maximum [indice v | v <- varTrab is]
 
--- | La función (normalizaIndPm pm) es una aplicación de la función
--- anterior. 
+-- | La función (normalizaIndPm pm) normaliza los índices de las variables
+-- de trabajo de las macros del programa pm. 
 
 normalizaIndPm :: ProgramaM -> ProgramaM
-normalizaIndPm (Pm is) = Pm (normIndPm [] (Pm is))
+normalizaIndPm (Pm is) = Pm (aux n is)
+    where
+      n = maximoInd is
+      aux n [] = [] 
+      aux n (i:is) | esM i = (normalizaIndices n i): 
+                             (aux (maximoInd [normalizaIndices n i]+1) is)
+                   | otherwise = i: (aux n is)
 
+-- | La función (etiquetaM i) devuelve la lista de las etiquetas de la
+-- instrucción i. 
 
+etiquetaM :: InstM -> [Etiqueta]
+etiquetaM (IncM _ e) = [e]
+etiquetaM (DecM _ e) = [e]
+etiquetaM (CondM e1 _ e2) = [e1,e2]
+etiquetaM (Macro _ is) = concat (map (etiquetaM) is)
+
+indexEt :: Etiqueta -> Int
+indexEt (E _ n) = n
+
+maxIndexEt :: [Etiqueta] -> Int
+maxIndexEt es = maximum [indexEt e | e <- es]
+
+normalizaIndicesEt n i = undefined -- Pendiente
+
+normEtPm :: ProgramaM -> ProgramaM
+normEtPm (Pm is) = Pm (aux n is)
+    where
+      n = maxIndexEt (concat (map (etiquetaM) is))
+      aux n [] = [] 
+      aux n (i:is) | esM i = (normalizaIndicesEt n i): 
+                             (aux (maximoInd [normalizaIndicesEt n i]+1) is)
+                   | otherwise = i: (aux n is)
