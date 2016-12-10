@@ -1,5 +1,9 @@
 module Macros where
 import GOTO
+import Data.List 
+
+-- * Implementación Macros GOTO
+-- ============================
 
 -- | Instrucciones con macros.
 
@@ -35,7 +39,7 @@ instance Show ProgramaM where
     show (Pm [i])    = show i
     show (Pm (i:is)) = (show i) ++ "\n" ++ (show (Pm is))
 
--- | Definimos las macro Y<-X y GOTO "E".
+-- | Definimos las macros Y<-X y GOTO "E".
 
 valX :: Etiqueta -> InstM
 valX e = Macro e [CondM (E [] 0) x (E "A" 0),
@@ -63,3 +67,96 @@ valV v v' e = Macro e [CondM (E "A" 0) v' (E "B" 0),
                        DecM z  (E "D" 0),
                        IncM v' (E "" 0),
                        goto (E "" 0) (E "C" 0)] 
+
+-----------------------------------------------------------------------
+--
+-- * Normalización de macros
+-- =========================
+
+-- | Normalización de los índices de las variables de trabajo dentro de
+-- una macro, empezando con el índice n. 
+
+-- | La función (susVar v v1 i) sustituye la variable v1 por v en la
+-- instrucción i. 
+
+susVar :: Variable -> Variable -> InstM -> InstM
+susVar v1 v i@(IncM v' e) | v' == v1 = IncM v e
+                          | otherwise = i
+susVar v1 v i@(DecM v' e) | v' == v1 = DecM v e
+                          | otherwise = i
+susVar v1 v i@(CondM e v' e') | v' == v1 =  CondM e v e'
+                              | otherwise = i
+susVar v1 v (Macro e is) = Macro e (aux is)
+    where
+      aux [i] = [susVar v1 v i]
+      aux (i:is) = (susVar v1 v i): aux is
+
+-- | La función (varsInstM i) calcula la lista de las variables de la
+-- instrucción i.
+
+varsInstM :: InstM -> [Variable]
+varsInstM (IncM v _) = [v]
+varsInstM (DecM v _) = [v]
+varsInstM (CondM e v e') = [v]
+varsInstM (Macro e is) = concat ( map (varsInstM ) is)
+
+-- | La función (varTrab is) calcula la lista de las variables de
+-- trabajo de una lista de instrucciones. 
+
+varTrab :: [InstM] -> [Variable]
+varTrab is = nub [ v | v <- vs, esZ v]
+    where
+      vs = concat (map (varsInstM) is)
+
+-- | La función (paresVars n vs) calcula a partir de una lista de
+-- variables de trabajo vs, pares formados por la variable y su
+-- normalizada. 
+
+paresVars :: Int -> [Variable] -> [(Variable, Variable)]
+paresVars n vs = [(v,aux  v) | v <- vs]
+    where
+      aux v = VarWork [indice v +n]
+
+-- | La función (normInd n is vs) normaliza las variables de las
+-- instrucciones de las variables de la lista de instrucciones de is
+-- mediante los pares de vs, según el entero n. 
+
+normInd :: Int -> [InstM] -> [(Variable, Variable)] -> [InstM]
+normInd n is [] = is
+normInd n is (v:vs) = normInd n [susVar (fst v) (snd v) i | i<- is] vs
+    
+-- | La función (normalizaIndices n macro) normaliza los índices de las
+-- variables de la macro según un entero n. 
+
+normalizaIndices :: Int -> InstM -> InstM
+normalizaIndices n (Macro e is) = Macro e (normInd n is vs)
+    where
+      vs = paresVars n (varTrab is)
+
+
+-- | La función (esM m) determina si m es una macro.
+
+esM :: InstM -> Bool
+esM (Macro _ _) = True
+esM _ = False
+
+-- | La función (normIndPm xs pm) normaliza los índices de las variables
+-- de trabajo de las macros del programa pm. Emplea un acumulador xs 
+
+normIndPm :: [InstM] -> ProgramaM -> [InstM]
+normIndPm _ (Pm []) = []
+normIndPm  xs (Pm (i:is)) 
+    | esM i = (normalizaIndices (maximum (map (indice) (varTrab xs))+1)
+               i): (normIndPm [(normalizaIndices 
+                                (maximum (map (indice) (varTrab xs)))
+                                i)]
+                    (Pm is) )
+    | otherwise = i: (normIndPm (i:xs) (Pm is))
+
+-- | La función (normalizaIndPm pm) es una aplicación de la función
+-- anterior. 
+
+normalizaIndPm :: ProgramaM -> ProgramaM
+normalizaIndPm (Pm is) = Pm (normIndPm [] (Pm is))
+
+
