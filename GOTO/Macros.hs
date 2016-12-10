@@ -80,6 +80,7 @@ valV v v' e = Macro e [CondM (E "A" 0) v' (E "B" 0),
 -- instrucción i. 
 
 susVar :: Variable -> Variable -> InstM -> InstM
+susVar v1 v i | v1 == v = i
 susVar v1 v i@(IncM v' e) | v' == v1 = IncM v e
                           | otherwise = i
 susVar v1 v i@(DecM v' e) | v' == v1 = DecM v e
@@ -118,8 +119,7 @@ paresVars n vs = [(v,aux  v) | v <- vs]
       aux v = VarWork [indice v +n]
 
 -- | La función (normInd n is vs) normaliza las variables de las
--- instrucciones de las variables de la lista de instrucciones de is
--- mediante los pares de vs, según el entero n. 
+-- instrucciones de is mediante los pares de vs, según el entero n. 
 
 normInd :: Int -> [InstM] -> [(Variable, Variable)] -> [InstM]
 normInd n is [] = is
@@ -152,7 +152,7 @@ maximoInd is = maximum [indice v | v <- varTrab is]
 normalizaIndPm :: ProgramaM -> ProgramaM
 normalizaIndPm (Pm is) = Pm (aux n is)
     where
-      n = maximoInd is
+      n = maximoInd is +1
       aux n [] = [] 
       aux n (i:is) | esM i = (normalizaIndices n i): 
                              (aux (maximoInd [normalizaIndices n i]+1) is)
@@ -178,16 +178,63 @@ indexEt (E _ n) = n
 maxIndexEt :: [Etiqueta] -> Int
 maxIndexEt es = maximum [indexEt e | e <- es]
 
+
+-- | La función (susEt e e' i) sustituye la etiqueta e por e' en la
+-- instrucción i. 
+
+susEt :: Etiqueta -> Etiqueta -> InstM -> InstM
+susEt e e' i | e == e' = i
+susEt e e' i@(IncM v e1)  | e1 == e = IncM v e'
+                          | otherwise = i
+susEt e e' i@(DecM v e1)  | e1 == e = DecM v e'
+                          | otherwise = i
+susEt e e' i@(CondM e1 v e2) | e1 == e = susEt e e' (CondM e' v e2)
+                             | e2 == e = susEt e e' (CondM e1 v e')
+                             | otherwise = i
+susEt e e' (Macro e1 is) = Macro e1 (aux is)
+    where
+      aux [i] = [susEt e e' i]
+      aux (i:is) = (susEt e e' i): aux is
+
+-- | La función (paresEt n es) calcula a partir de una lista de
+-- etiquetas es, pares formados por la etiqueta y su normalizada. 
+
+paresEt :: Int -> [Etiqueta] -> [(Etiqueta,Etiqueta)]
+paresEt n es = [(e, aux e) | e <- es]
+    where
+      aux (E str n') = E str (n'+n)
+
+-- | La función (normEt n is es) normaliza las etiquetas de las
+-- instrucciones de is mediante los pares de es, según el entero n. 
+
+normEt :: Int -> [InstM] -> [(Etiqueta, Etiqueta)] -> [InstM]
+normEt n is [] = is
+normEt n is (e:es) = normEt n [susEt (fst e) (snd e) i | i <- is] es
+
 -- | La función (normalizaIndicesEt n i)  es la normalización de los
 -- índices de las etiquetas de i.
 
-normalizaIndicesEt n i = undefined -- Pendiente
+normalizaIndicesEt :: Int -> InstM -> InstM
+normalizaIndicesEt n (Macro e is) = Macro e (normEt n is es)
+    where
+      es = paresEt n (concat (map (etiquetaM) is))
+
+-- | La función (normEtPm pm) normaliza las etiquetas del programa pm.
 
 normEtPm :: ProgramaM -> ProgramaM
 normEtPm (Pm is) = Pm (aux n is)
     where
-      n = maxIndexEt (concat (map (etiquetaM) is))
+      n = maxIndexEt (concat (map (etiquetaM) is))+1
       aux n [] = [] 
-      aux n (i:is) | esM i = (normalizaIndicesEt n i): 
-                             (aux (maxIndexEt [normalizaIndicesEt n i]+1) is)
-                   | otherwise = i: (aux n is)
+      aux n (i:is) 
+          | esM i = (normalizaIndicesEt n i): 
+                    (aux (maxIndexEt 
+                          (concat [etiquetaM 
+                                   (normalizaIndicesEt n i)])+1) is)
+          | otherwise = i: (aux n is)
+
+-- | La función (normM pm) genera la expansión normalizada del programa
+-- pm.
+
+normM :: ProgramaM -> ProgramaM
+normM = normEtPm . normalizaIndPm
