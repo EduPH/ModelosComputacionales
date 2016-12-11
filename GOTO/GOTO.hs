@@ -113,7 +113,7 @@ instance Show Instruccion where
      show (Condicional l v l') = show l ++ " " ++ "IF" ++ " "  
                                  ++ show v ++ "/=" ++ (show 0)
                                  ++" "++ "GOTO" ++" " ++ show l'
-     show (SKIP l) = show l ++ " " ++ show "Y <- Y"
+     show (SKIP l) = show l ++ " " ++ "Y <- Y"
 
 -- | Un programa se define como una lista de instrucciones.
 

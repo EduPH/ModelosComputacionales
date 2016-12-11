@@ -11,6 +11,7 @@ data InstM  =  IncM Variable Etiqueta
                   | DecM Variable Etiqueta
                   | CondM Etiqueta Variable Etiqueta
                   | Macro Etiqueta [InstM]
+                  | SKIPM Etiqueta
                     deriving Eq
 
 -- | Representación por pantalla. 
@@ -23,11 +24,24 @@ instance Show InstM where
      show (CondM l v l') = show l ++ " " ++ "IF" ++ " "  
                                  ++ show v ++ "/=" ++ (show 0)
                                  ++" "++ "GOTO" ++" " ++ show l'
+     show (SKIPM l)      = show l ++ " " ++ "Y <- Y"
      show (Macro (E "" n) [i]) = show i
      show (Macro e@(E "" n) (i:is)) = 
                show i ++ "\n" ++ show (Macro e is)
      show (Macro e [i])    = show e ++ show i
      show (Macro e (i:is)) = show e ++ show i ++ "\n" ++ show (Macro e is)
+
+-- | Ejemplos
+-- >>> IncM x (E "A" 0)
+-- [A]  X<-X+1
+-- >>> DecM y (E "B" 4)
+-- [B4] Y<-Y-1
+-- >>> CondM (E "" 0) x  (E "A" 0)
+--      IF X/=0 GOTO [A] 
+-- >>> Macro (E "A" 0) [IncM x (E "" 0), DecM x (E "B" 0), CondM (E "" 0) z (E "B" 3)]
+-- [A]      X<-X+1
+-- [A] [B]  X<-X-1
+-- [A]      IF Z/=0 GOTO [B3]
 
 -- | Programas con macros.
 
