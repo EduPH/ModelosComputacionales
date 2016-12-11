@@ -37,7 +37,7 @@ instance Show Variable where
   show ( VarWork [i]) = "Z" ++ show i
   show ( VarWork is)  = "Z" ++ showInts is
 
--- | Función que determina el valor de la variable en un estado.
+-- | La función (valor e) determina el valor de la variable en un estado.
 
 valor :: Estado -> Valor
 valor (VarIn i,v) = v
@@ -48,20 +48,20 @@ valor (VarWork i, v) = v
 -- >>> valor (x,3)
 -- 3
 
--- | Caracterizamos las variables de trabajo.
+-- | La función (esZ v) caracteriza las variables de trabajo.
 
 esZ :: Variable -> Bool
 esZ (VarWork _) = True
 esZ _ = False
 
--- | Definimos algunas variables para facilitar su uso.
+-- | Definimos las variables (x,y,z) para facilitar su uso.
 
-y,z :: Variable
+x,y,z :: Variable
+x = VarIn []
 y = VarOut 
 z = VarWork [] 
-x = VarIn []
 
--- | Cálculo de índice de una variable.
+-- | La función (indice v) calcula el índice de una variable.
 
 indice :: Variable -> Int
 indice (VarWork []) = 0
@@ -77,11 +77,19 @@ indice (VarIn [i]) = i
 -- >>> indice (VarWork [23])
 -- 23
 
--- | Definimos las etiquetas.
+-- | Definimos el tipo de dato (Etiqueta).
 
 data Etiqueta = E String Int
                 deriving Eq
  
+-- | Ejemplos
+-- >>> E "A" 0
+-- [A] 
+-- >>> E "A" 3
+-- [A3]     
+-- >>> E "B" 0
+-- [B] 
+
 -- | Se definen las instrucciones incremento, decremento y condicional.
 
 data Instruccion =  Incremento Variable Etiqueta
