@@ -182,6 +182,7 @@ etiquetaM :: InstM -> [Etiqueta]
 etiquetaM (IncM _ e) = [e]
 etiquetaM (DecM _ e) = [e]
 etiquetaM (CondM e1 _ e2) = [e1,e2]
+etiquetaM (SKIPM e) = [e]
 etiquetaM (Macro _ is) = concat (map (etiquetaM) is)
 
 -- | La función (indexEt e) devuelve el índice de la etiqueta e.
@@ -259,3 +260,51 @@ normM = normEtPm . normalizaIndPm
 
 -- * Ejecución de programas con macros
 -- ===================================
+
+etiquetaM' :: InstM -> Etiqueta
+etiquetaM' (IncM _ e) = e
+etiquetaM' (DecM _ e) = e
+etiquetaM' (CondM e1 _ e2) = e1
+etiquetaM' (SKIPM e) = e
+etiquetaM' (Macro e is) = e
+
+buscaIM :: ProgramaM -> Etiqueta -> Int
+buscaIM (Pm []) e = 0
+buscaIM (Pm (i:is)) e | etiquetaM' i == e = 1
+                      | otherwise = 1+ buscaIM (Pm is) e
+
+etSalidaM :: ProgramaM -> Etiqueta -> Bool
+etSalidaM (Pm []) e = True
+etSalidaM (Pm is) e = null [i | i<- is, etiquetaM' i == e]
+
+
+ejecutaPm :: Int -> ProgramaM -> [Estado] -> Estado
+ejecutaPm n p@(Pm is) xs = aux (is !! (n-1))
+    where 
+      aux (IncM v e) | n < length is =  ejecutaPm (n+1) p (suma1
+                                                                  v xs)
+                           | otherwise = salida (suma1 v xs)
+      aux (DecM v e) | n < length is =  ejecutaPm (n+1) p (resta1
+                                                                  v xs)
+                           | otherwise = salida (resta1 v xs)
+      
+      aux (CondM e v e') | valorP v xs /= 0 && not ( etSalidaM p e') =  
+                                   ejecutaPm (buscaIM p e') p xs
+                               | valorP v xs /= 0 && etSalidaM p e' = 
+                                   salida xs
+                               | otherwise = 
+                                   if (n < length is) then 
+                                       ejecutaPm (n+1) p xs 
+                                   else (salida xs)
+                                                 
+      aux (SKIPM e) = ejecutaPm (n+1) p xs
+
+-- Pendiente normalizar un programa para poder ejecutarlo expandido.
+
+programaIdentidadM :: ProgramaM
+programaIdentidadM = Pm [CondM (E [] 0) x (E "B" 0),
+                         IncM z (E [] 0), 
+                         CondM (E [] 0) z (E "E" 0),  
+                         DecM x (E "B" 0),                         
+                         IncM y (E [] 0),                         
+                         CondM (E [] 0) x (E "B" 0)]
