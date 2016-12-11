@@ -278,27 +278,29 @@ etSalidaM (Pm []) e = True
 etSalidaM (Pm is) e = null [i | i<- is, etiquetaM' i == e]
 
 
-ejecutaPm :: Int -> ProgramaM -> [Estado] -> Estado
-ejecutaPm n p@(Pm is) xs = aux (is !! (n-1))
+ejecutaPm :: Int -> Int -> ProgramaM -> [Estado] -> Estado
+ejecutaPm n m p@(Pm is) xs = aux (is !! (n-1))
     where 
-      aux (IncM v e) | n < length is =  ejecutaPm (n+1) p (suma1
-                                                                  v xs)
-                           | otherwise = salida (suma1 v xs)
-      aux (DecM v e) | n < length is =  ejecutaPm (n+1) p (resta1
-                                                                  v xs)
-                           | otherwise = salida (resta1 v xs)
+      aux (IncM v e) | n < length is =  
+                         ejecutaPm (n+1) m p (suma1 v xs)
+                     | otherwise = salida (suma1 v xs)
+      aux (DecM v e) | n < length is =  
+                         ejecutaPm (n+1) m p (resta1 v xs)
+                     | otherwise = salida (resta1 v xs)
       
       aux (CondM e v e') | valorP v xs /= 0 && not ( etSalidaM p e') =  
-                                   ejecutaPm (buscaIM p e') p xs
-                               | valorP v xs /= 0 && etSalidaM p e' = 
-                                   salida xs
-                               | otherwise = 
-                                   if (n < length is) then 
-                                       ejecutaPm (n+1) p xs 
-                                   else (salida xs)
+                             ejecutaPm (buscaIM p e') m p xs
+                         | valorP v xs /= 0 && etSalidaM p e' = 
+                             salida xs
+                         | otherwise = 
+                             if (n < length is) then 
+                                 ejecutaPm (n+1) m p xs 
+                             else (salida xs)
                                                  
-      aux (SKIPM e) = ejecutaPm (n+1) p xs
-
+      aux (SKIPM e) = ejecutaPm (n+1) m p xs
+      aux (Macro e ins) = undefined
+instM :: InstM -> [InstM]
+instM (Macro _ is) = is
 -- Pendiente normalizar un programa para poder ejecutarlo expandido.
 
 programaIdentidadM :: ProgramaM
