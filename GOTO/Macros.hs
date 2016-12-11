@@ -255,3 +255,7 @@ normEtPm (Pm is) = Pm (aux n is)
 
 normM :: ProgramaM -> ProgramaM
 normM = normEtPm . normalizaIndPm
+
+
+-- * Ejecución de programas con macros
+-- ===================================
