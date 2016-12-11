@@ -82,19 +82,12 @@ indice (VarIn [i]) = i
 data Etiqueta = E String Int
                 deriving Eq
  
--- | Ejemplos
--- >>> E "A" 0
--- [A] 
--- >>> E "A" 3
--- [A3]     
--- >>> E "B" 0
--- [B] 
-
 -- | Se definen las instrucciones incremento, decremento y condicional.
 
 data Instruccion =  Incremento Variable Etiqueta
                   | Decremento Variable Etiqueta
                   | Condicional Etiqueta Variable Etiqueta
+                  | SKIP Etiqueta
                     deriving Eq
 
 -- | Representación de las etiquetas e instrucciones por pantalla:
@@ -104,6 +97,14 @@ instance Show Etiqueta where
     show (E str 0) = "[" ++ str ++ "] "
     show (E str n) = "["++ str ++ show n ++ "]"
 
+-- | Ejemplos
+-- >>> E "A" 0
+-- [A] 
+-- >>> E "A" 3
+-- [A3]     
+-- >>> E "B" 0
+-- [B] 
+
 instance Show Instruccion where
      show (Incremento v l)     = show l ++ " " ++ show v ++ "<-" 
                                  ++ show v ++"+" ++ (show 1)
@@ -112,6 +113,7 @@ instance Show Instruccion where
      show (Condicional l v l') = show l ++ " " ++ "IF" ++ " "  
                                  ++ show v ++ "/=" ++ (show 0)
                                  ++" "++ "GOTO" ++" " ++ show l'
+     show (SKIP l) = show l ++ " " ++ show "Y <- Y"
 
 -- | Un programa se define como una lista de instrucciones.
 
@@ -159,6 +161,7 @@ etiqueta :: Instruccion -> Etiqueta
 etiqueta (Decremento v l) = l
 etiqueta (Incremento v l) = l
 etiqueta (Condicional l v l') = l
+etiqueta (SKIP l) = l
 
 -- | Lista de etiquetas de un programa.
 
@@ -234,6 +237,7 @@ ejecuta n p@(Pr is) xs = aux (is !! (n-1))
                                        ejecuta (n+1) p xs 
                                    else (salida xs)
                                                  
+      aux (SKIP e) = ejecuta (n+1) p xs
 
 -- | La función (ejecutaP p) ejecuta el programa p según los estados xs.
      
