@@ -301,7 +301,11 @@ ejecutaPm n m p@(Pm is) xs = aux (is !! (n-1))
       aux (Macro e ins) = undefined
 instM :: InstM -> [InstM]
 instM (Macro _ is) = is
--- Pendiente normalizar un programa para poder ejecutarlo expandido.
+-- Pendiente normalizar un programa para poder ejecutarlo
+-- expandido. IDEA: usar los índices n y m, n posición de las
+-- instrucciones, m posición dentro de la macro. Hay que tener en cuenta
+-- que n sea menor que la longitud del programa y m menor que las
+-- longitud de la macro. 
 
 programaIdentidadM :: ProgramaM
 programaIdentidadM = Pm [CondM (E [] 0) x (E "B" 0),
