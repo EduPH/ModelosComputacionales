@@ -1,4 +1,3 @@
-
 module GOTO where
 import Data.List
 
@@ -45,11 +44,22 @@ valor (VarIn i,v) = v
 valor (VarOut, v) = v
 valor (VarWork i, v) = v
 
+-- | Ejemplos
+-- >>> valor (x,3)
+-- 3
+
 -- | Caracterizamos las variables de trabajo.
 
 esZ :: Variable -> Bool
 esZ (VarWork _) = True
 esZ _ = False
+
+-- | Definimos algunas variables para facilitar su uso.
+
+y,z :: Variable
+y = VarOut 
+z = VarWork [] 
+x = VarIn []
 
 -- | Cálculo de índice de una variable.
 
@@ -59,14 +69,16 @@ indice (VarWork [i]) = i
 indice (VarIn []) = 0
 indice (VarIn [i]) = i
 
--- | Definimos algunas variables para facilitar su uso.
-
-y,z :: Variable
-y = VarOut 
-z = VarWork [] 
-x = VarIn []
+-- | Ejemplos
+-- >>> indice x
+-- 0
+-- >>> VarWork [23]
+-- Z23
+-- >>> indice (VarWork [23])
+-- 23
 
 -- | Definimos las etiquetas.
+
 data Etiqueta = E String Int
                 deriving Eq
  
@@ -103,7 +115,30 @@ instance Show Programa where
     show (Pr [i]) = show i
     show (Pr (i:is)) = (show i) ++ "\n" ++ (show (Pr is))
 
--- | Cambio del valor de una variable.
+-- | Definimos un programa ejemplo.
+
+programaIdentidad :: Programa
+programaIdentidad = Pr [Condicional (E [] 0) x (E "B" 0), 
+                        Incremento z (E [] 0), 
+                        Condicional (E [] 0) z (E "E" 0), 
+                        Decremento x (E "B" 0), 
+                        Incremento y (E [] 0), 
+                        Condicional (E [] 0) x (E "B" 0)]
+
+-- | Ejemplos
+-- >>> programaIdentidad
+--      IF X/=0 GOTO [B] 
+--      Z<-Z+1
+--      IF Z/=0 GOTO [E] 
+-- [B]  X<-X-1
+--      Y<-Y+1
+--      IF X/=0 GOTO [B] 
+
+
+-- * Ejecución de programas
+-- ========================
+
+-- | Cambio del valor de una variable en un estado.
 
 cambiaVal :: Estado -> Valor -> Estado
 cambiaVal (VarIn i, v) v' =   (VarIn i,v')
@@ -144,10 +179,12 @@ valorP v xs = head [valor x | x <- xs, (fst x) ==v]
 
 
 -- | Funciones auxiliares para Incremento y Decremento: 
+
 suma1 :: Variable -> [(Variable, Valor)] -> [Estado]
 suma1 v [] = []
 suma1 v (x':xs) | fst x' == v = (cambiaVal x' (valor x' +1)):xs
                 | otherwise = x': (suma1 v xs)
+
 resta1 :: Variable -> [(Variable, Valor)] -> [Estado]
 resta1 v [] = []
 resta1 v (x':xs) | fst x' == v && valor x' /= 0 = 
@@ -156,7 +193,7 @@ resta1 v (x':xs) | fst x' == v && valor x' /= 0 =
                  | otherwise = x': (resta1 v xs)
 
 
--- | Función para obtener la variable de salida.
+-- | Función para obtener la variable de salida y su valor.
 
 salida :: [Estado] -> Estado
 salida xs = head [v | v <- xs, fst v == VarOut]
@@ -167,8 +204,10 @@ etSalida :: Programa -> Etiqueta -> Bool
 etSalida (Pr []) e = True
 etSalida (Pr is) e = null [i | i<- is, etiqueta i == e]
 
--- | Ejecución de programas.
+-- | La función (ejecuta n p xs) ejecuta el paso n del programa p según
+-- una lista de estados xs. 
 
+ejecuta :: Int -> Programa -> [Estado] -> Estado
 ejecuta n p@(Pr is) xs = aux (is !! (n-1))
     where 
       aux (Incremento v e) | n < length is =  ejecuta (n+1) p (suma1
@@ -178,7 +217,8 @@ ejecuta n p@(Pr is) xs = aux (is !! (n-1))
                                                                   v xs)
                            | otherwise = salida (resta1 v xs)
       
-      aux (Condicional e v e') | valorP v xs /= 0 && not ( etSalida p e')  =  ejecuta (buscaI p e') p xs
+      aux (Condicional e v e') | valorP v xs /= 0 && not ( etSalida p e') =  
+                                   ejecuta (buscaI p e') p xs
                                | valorP v xs /= 0 && etSalida p e' = 
                                    salida xs
                                | otherwise = 
@@ -186,10 +226,15 @@ ejecuta n p@(Pr is) xs = aux (is !! (n-1))
                                        ejecuta (n+1) p xs 
                                    else (salida xs)
                                                  
+
+-- | La función (ejecutaP p) ejecuta el programa p según los estados xs.
      
 ejecutaP :: Programa -> [Estado] -> Estado
 ejecutaP p xs = ejecuta 1 p xs
 
+-- | Ejemplo
+-- >>> ejecutaP programaIdentidad [(x,8),(y,0),(z,0)]
+-- (Y,8)
 
 -- | Lista de las variables de un programa sin repetir y repetidas.
 
