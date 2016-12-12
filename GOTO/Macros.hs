@@ -257,10 +257,35 @@ normEtPm (Pm is) = Pm (aux n is)
 normM :: ProgramaM -> ProgramaM
 normM = normEtPm . normalizaIndPm
 
+
+-- | Ejemplos
+-- >>> let p =Pm [IncM z (E "" 0), valV x z (E "A" 0), DecM x (E "B" 0)]
+-- >>> normM p
+--      Z<-Z+1
+-- [A] [A1] IF Z1/=0 GOTO [B1]
+-- [A]      Z1<-Z1+1
+--      IF Z1/=0 GOTO [C1]
+-- [A] [B1] Z1<-Z1-1
+-- [A]      X<-X+1
+-- [A]      Z1<-Z1+1
+-- [A]      Z1<-Z1+1
+--      IF Z1/=0 GOTO [A1]
+-- [A] [C1] IF Z1/=0 GOTO [D1]
+-- [A]      Z1<-Z1+1
+--      IF Z1/=0 GOTO [E1]
+-- [A] [D1] Z1<-Z1-1
+-- [A]      Z1<-Z1+1
+-- [A]      Z1<-Z1+1
+--      IF Z1/=0 GOTO [C1]
+-- [B]  X<-X-1
+
+-- | La función (noEsVacia e) determina si la etiqueta e tiene nombre.
+
 noEsVacia :: Etiqueta -> Bool 
 noEsVacia (E [] _) = False
 noEsVacia _ = True
 
+-- | La función (normEtMAux m) genera una macro cuya primera instrucción tiene la misma etiqueta que la macro.
 
 normEtMAux :: InstM -> InstM
 normEtMAux (Macro e ins@(i:is)) 
@@ -269,8 +294,13 @@ normEtMAux (Macro e ins@(i:is))
     | otherwise = Macro e ((susEt (head (etiquetaM i)) e i):is)
 normEtMAux i = i
 
+-- | La función (instDeMacro m) obtiene la lista de instrucciones de la macro m.
+
 instDeMacro :: InstM -> [InstM]
 instDeMacro (Macro _ v) = v
+
+-- | La función (instM2inst i) convierte instrucciones tipo macro a
+-- instrucciones.
 
 instM2inst :: InstM -> [Instruccion]
 instM2inst (IncM v e) = [Incremento v e]
@@ -280,12 +310,37 @@ instM2inst (SKIPM e) = [SKIP e]
 instM2inst m@(Macro e v) = 
     concat (map (instM2inst) (instDeMacro (normEtMAux m)))
 
+-- | La función (progM2progAux p) convierte programas con macros a
+-- programas sin macros.
+
 progM2progAux :: ProgramaM -> Programa
 progM2progAux (Pm is) = Pr (concat (map (instM2inst) is))
+
+-- | La función (progM2prog p) convierte programas con macros a
+-- programas sin macros, con normalización previa. 
 
 progM2prog :: ProgramaM -> Programa
 progM2prog = progM2progAux . normM 
 
+-- >>> let p =Pm [IncM z (E "" 0), valV x z (E "A" 0), DecM x (E "B" 0)]
+-- >>> progM2prog p
+--      Z<-Z+1
+-- [A]  IF Z1/=0 GOTO [B1]
+--      Z1<-Z1+1
+--      IF Z1/=0 GOTO [C1]
+-- [B1] Z1<-Z1-1
+--      X<-X+1
+--      Z1<-Z1+1
+--      Z1<-Z1+1
+--      IF Z1/=0 GOTO [A] 
+-- [C1] IF Z1/=0 GOTO [D1]
+--      Z1<-Z1+1
+--      IF Z1/=0 GOTO [E1]
+-- [D1] Z1<-Z1-1
+--      Z1<-Z1+1
+--      Z1<-Z1+1
+--      IF Z1/=0 GOTO [C1]
+-- [B]  X<-X-1
 
 
 
