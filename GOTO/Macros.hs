@@ -257,60 +257,40 @@ normEtPm (Pm is) = Pm (aux n is)
 normM :: ProgramaM -> ProgramaM
 normM = normEtPm . normalizaIndPm
 
-
--- * Ejecución de programas con macros
--- ===================================
-
-etiquetaM' :: InstM -> Etiqueta
-etiquetaM' (IncM _ e) = e
-etiquetaM' (DecM _ e) = e
-etiquetaM' (CondM e1 _ e2) = e1
-etiquetaM' (SKIPM e) = e
-etiquetaM' (Macro e is) = e
-
-buscaIM :: ProgramaM -> Etiqueta -> Int
-buscaIM (Pm []) e = 0
-buscaIM (Pm (i:is)) e | etiquetaM' i == e = 1
-                      | otherwise = 1+ buscaIM (Pm is) e
-
-etSalidaM :: ProgramaM -> Etiqueta -> Bool
-etSalidaM (Pm []) e = True
-etSalidaM (Pm is) e = null [i | i<- is, etiquetaM' i == e]
+noEsVacia :: Etiqueta -> Bool 
+noEsVacia (E [] _) = False
+noEsVacia _ = True
 
 
-ejecutaPm :: Int -> Int -> ProgramaM -> [Estado] -> Estado
-ejecutaPm n m p@(Pm is) xs = aux (is !! (n-1))
-    where 
-      aux (IncM v e) | n < length is =  
-                         ejecutaPm (n+1) m p (suma1 v xs)
-                     | otherwise = salida (suma1 v xs)
-      aux (DecM v e) | n < length is =  
-                         ejecutaPm (n+1) m p (resta1 v xs)
-                     | otherwise = salida (resta1 v xs)
-      
-      aux (CondM e v e') | valorP v xs /= 0 && not ( etSalidaM p e') =  
-                             ejecutaPm (buscaIM p e') m p xs
-                         | valorP v xs /= 0 && etSalidaM p e' = 
-                             salida xs
-                         | otherwise = 
-                             if (n < length is) then 
-                                 ejecutaPm (n+1) m p xs 
-                             else (salida xs)
-                                                 
-      aux (SKIPM e) = ejecutaPm (n+1) m p xs
-      aux (Macro e ins) = undefined
-instM :: InstM -> [InstM]
-instM (Macro _ is) = is
--- Pendiente normalizar un programa para poder ejecutarlo
--- expandido. IDEA: usar los índices n y m, n posición de las
--- instrucciones, m posición dentro de la macro. Hay que tener en cuenta
--- que n sea menor que la longitud del programa y m menor que las
--- longitud de la macro. 
+normEtMAux :: InstM -> InstM
+normEtMAux (Macro e ins@(i:is)) 
+    | noEsVacia (head (etiquetaM i)) =
+       Macro e (map (susEt (head (etiquetaM i)) e) ins )
+    | otherwise = Macro e ((susEt (head (etiquetaM i)) e i):is)
+normEtMAux i = i
 
-programaIdentidadM :: ProgramaM
-programaIdentidadM = Pm [CondM (E [] 0) x (E "B" 0),
-                         IncM z (E [] 0), 
-                         CondM (E [] 0) z (E "E" 0),  
-                         DecM x (E "B" 0),                         
-                         IncM y (E [] 0),                         
-                         CondM (E [] 0) x (E "B" 0)]
+instDeMacro :: InstM -> [InstM]
+instDeMacro (Macro _ v) = v
+
+instM2inst :: InstM -> [Instruccion]
+instM2inst (IncM v e) = [Incremento v e]
+instM2inst (DecM v e) = [Decremento v e]
+instM2inst (CondM e v e') = [Condicional e v e']
+instM2inst (SKIPM e) = [SKIP e]
+instM2inst m@(Macro e v) = 
+    concat (map (instM2inst) (instDeMacro (normEtMAux m)))
+
+progM2progAux :: ProgramaM -> Programa
+progM2progAux (Pm is) = Pr (concat (map (instM2inst) is))
+
+progM2prog :: ProgramaM -> Programa
+progM2prog = progM2progAux . normM 
+
+
+
+
+
+
+
+
+
