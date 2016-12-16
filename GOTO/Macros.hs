@@ -322,6 +322,7 @@ progM2progAux (Pm is) = Pr (concat (map (instM2inst) is))
 progM2prog :: ProgramaM -> Programa
 progM2prog = progM2progAux . normM 
 
+-- | Ejemplo
 -- >>> let p =Pm [IncM z (E "" 0), valV x z (E "A" 0), DecM x (E "B" 0)]
 -- >>> progM2prog p
 --      Z<-Z+1
@@ -341,11 +342,10 @@ progM2prog = progM2progAux . normM
 --      Z1<-Z1+1
 --      IF Z1/=0 GOTO [C1]
 -- [B]  X<-X-1
-
-
-
-
-
-
+-- >>> let p = Pm [Macro (E "" 0) [IncM x (E "" 0), Macro (E "" 0) [IncM x (E "" 0), Macro (E "" 0) [IncM x (E "" 0)]]]]
+-- >>> progM2prog p
+--      X<-X+1
+--      X<-X+1
+--      X<-X+1
 
 
