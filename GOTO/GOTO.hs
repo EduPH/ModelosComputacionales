@@ -38,6 +38,14 @@ instance Show Variable where
   show ( VarWork [i]) = "Z" ++ show i
   show ( VarWork is)  = "Z" ++ showInts is
 
+-- | Ejemplos
+-- >>> VarIn [2]
+-- X2
+-- >>> VarOut 
+-- Y
+-- >>> VarWork [15]
+-- Z15
+
 -- | La función (valor e) determina el valor de la variable en un estado.
 
 valor :: Estado -> Valor
@@ -55,7 +63,14 @@ esZ :: Variable -> Bool
 esZ (VarWork _) = True
 esZ _ = False
 
--- | Definimos las variables (x,y,z) para facilitar su uso.
+-- | Ejemplos
+-- >>> esZ (VarWork [15])
+-- True
+-- >>> esZ (VarIn [15])
+-- False
+
+-- | Definimos las variables (x,y,z) para facilitar su uso en la
+-- definición de programas. 
 
 x,y,z :: Variable
 x = VarIn []
@@ -156,6 +171,10 @@ cambiaVal (VarIn i, v) v' =   (VarIn i,v')
 cambiaVal (VarOut, v) v' = (VarOut, v')
 cambiaVal (VarWork i, v) v' = (VarWork i, v')
 
+-- | Ejemplos
+-- >>> cambiaVal (x,3) 4
+-- (X,4)
+
 -- | Etiqueta de una instrucción.
 
 etiqueta :: Instruccion -> Etiqueta
@@ -164,10 +183,20 @@ etiqueta (Incremento v l) = l
 etiqueta (Condicional l v l') = l
 etiqueta (SKIP l) = l
 
+-- | Ejemplos
+-- >>> Incremento x (E "A" 0)
+-- [A]  X<-X+1
+-- >>> etiqueta (Incremento x (E "A" 0))
+-- [A]
+
 -- | Lista de etiquetas de un programa.
 
 listaEtiquetas :: Programa -> [Etiqueta]
 listaEtiquetas (Pr is) = map (etiqueta) is
+
+-- | Ejemplos
+-- >>> listaEtiquetas programaIdentidad
+-- [    ,    ,    ,[B] ,    ,    ]
 
 -- | Variable sobre la que actúa una instrucción.
 
@@ -176,6 +205,12 @@ varInstruccion (Incremento v _) = v
 varInstruccion (Decremento v _) = v
 varInstruccion (Condicional _ v _) = v
 
+-- | Ejemplos
+-- >>> Incremento x (E "" 0)
+--      X<-X+1
+-- >>> varInstruccion (Incremento x (E "" 0))
+-- X
+
 -- | Búsqueda de la posición de una instrucción con una etiqueta dada.
 
 buscaI :: Programa -> Etiqueta -> Int
@@ -183,12 +218,18 @@ buscaI (Pr []) e = 0
 buscaI (Pr (i:is)) e | etiqueta i == e = 1
                      | otherwise = 1+ buscaI (Pr is) e
 
+-- | Ejemplos
+-- >>> buscaI programaIdentidad (E "B" 0)
+-- 4
 
 -- | Valor de una variable en una lista de estados.
 
 valorP :: Variable -> [Estado] -> Valor
 valorP v xs = head [valor x | x <- xs, (fst x) ==v]
 
+-- | Ejemplos
+-- >>> valorP x [(x,7),(y,0),(z,3)]
+-- 7
 
 -- | Funciones auxiliares para Incremento y Decremento: 
 
@@ -204,17 +245,32 @@ resta1 v (x':xs) | fst x' == v && valor x' /= 0 =
                  | fst x' == v && valor x' == 0 = (x':xs)
                  | otherwise = x': (resta1 v xs)
 
-
+-- | Ejemplos
+-- >>> suma1 x [(x,7),(y,0),(z,3)]
+-- [(X,8),(Y,0),(Z,3)]
+-- >>> resta1 x [(x,7),(y,0),(z,3)]
+-- [(X,6),(Y,0),(Z,3)]
+ 
 -- | Función para obtener la variable de salida y su valor.
 
 salida :: [Estado] -> Estado
 salida xs = head [v | v <- xs, fst v == VarOut]
+
+-- | Ejemplos
+-- >>> salida [(x,7),(y,0),(z,3)]
+-- (Y,0)
 
 -- | Caracterización de las etiquetas de salida.
 
 etSalida :: Programa -> Etiqueta -> Bool
 etSalida (Pr []) e = True
 etSalida (Pr is) e = null [i | i<- is, etiqueta i == e]
+
+-- | Ejemplos
+-- >>> etSalida programaIdentidad (E "B" 0)
+-- False
+-- >>> etSalida programaIdentidad (E "E" 0)
+-- True
 
 -- | La función (ejecuta n p xs) ejecuta el paso n del programa p según
 -- una lista de estados xs. 
@@ -256,3 +312,9 @@ variablesDe (Pr ps) = nub (map (varInstruccion) ps)
 
 listaVariablesDe :: Programa -> [Variable]
 listaVariablesDe (Pr ps) = map (varInstruccion) ps
+
+-- | Ejemplos
+-- >>> variablesDe programaIdentidad
+-- [X,Z,Y]
+-- >>> listaVariablesDe programaIdentidad
+-- [X,Z,Z,X,Y,X]
