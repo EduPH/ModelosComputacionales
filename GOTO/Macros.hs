@@ -106,6 +106,12 @@ susVar v1 v (Macro e is) = Macro e (aux is)
       aux [i] = [susVar v1 v i]
       aux (i:is) = (susVar v1 v i): aux is
 
+-- | Ejemplos
+-- >>> IncM x (E "" 0)
+--      X<-X+1
+-- >>> susVar x (VarIn [2]) (IncM x (E "" 0))
+--      X2<-X2+1
+
 -- | La función (varsInstM i) calcula la lista de las variables de la
 -- instrucción i.
 
@@ -114,6 +120,12 @@ varsInstM (IncM v _) = [v]
 varsInstM (DecM v _) = [v]
 varsInstM (CondM e v e') = [v]
 varsInstM (Macro e is) = concat ( map (varsInstM ) is)
+
+-- | Ejemplos
+-- >>> varsInstM (IncM x (E "" 0))
+-- [X]
+-- >>> varsInstM (valX (E "" 0))
+-- [X,Z,Z,X,Y,X]
 
 -- | La función (varTrab is) calcula la lista de las variables de
 -- trabajo de una lista de instrucciones. 
@@ -132,13 +144,22 @@ paresVars n vs = [(v,aux  v) | v <- vs]
     where
       aux v = VarWork [indice v +n]
 
+-- | Ejemplos
+-- >>> paresVars 5 [z,VarWork [2], VarWork [6]]
+-- [(Z,Z5),(Z2,Z7),(Z6,Z11)]
+
 -- | La función (normInd n is vs) normaliza las variables de las
 -- instrucciones de is mediante los pares de vs, según el entero n. 
 
 normInd :: Int -> [InstM] -> [(Variable, Variable)] -> [InstM]
 normInd n is [] = is
 normInd n is (v:vs) = normInd n [susVar (fst v) (snd v) i | i<- is] vs
-    
+
+-- | Ejemplos   
+-- >>> normInd 5 [IncM z (E "" 0), DecM z (E "" 0), Macro (E "" 0) [IncM z (E "B" 0), DecM z (E "" 0)]] [(z, VarWork [2])]
+-- [     Z2<-Z2+1,     Z2<-Z2-1,[B]  Z2<-Z2+1
+--      Z2<-Z2-1]
+ 
 -- | La función (normalizaIndices n macro) normaliza los índices de las
 -- variables de la macro según un entero n. 
 
@@ -147,6 +168,14 @@ normalizaIndices n (Macro e is) = Macro e (normInd n is vs)
     where
       vs = paresVars n (varTrab is)
 
+-- | Ejemplos
+-- >>> normalizaIndices 5 (valX (E "" 0))
+--      IF X/=0 GOTO [A] 
+--      Z5<-Z5+1
+--      IF Z5/=0 GOTO [E] 
+-- [A]  X<-X-1
+--      Y<-Y+1
+--      IF X/=0 GOTO [A] 
 
 -- | La función (esM m) determina si m es una macro.
 
