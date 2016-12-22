@@ -1,4 +1,9 @@
 
+{-|
+Module      : GOTO
+Implementación del lenguaje GOTO
+-}
+
 module GOTO where
 import Data.List
 
@@ -10,6 +15,7 @@ import Data.List
 -- se denotan por x,y,z, respectivamente. Además, puede llevar índices.
 
 type Indice = [Int]
+-- | Tipo de dato 'Variable' 
 data Variable = VarIn Indice 
               | VarOut 
               | VarWork Indice 
@@ -18,6 +24,7 @@ data Variable = VarIn Indice
 -- | Un estado es un par de una variable y el valor asociado a ella.
 
 type Valor = Int
+-- | Tipo de dato 'Estado'
 type Estado =  (Variable, Valor)
 
 -- | Función auxiliar para la representación por pantalla.
@@ -231,12 +238,14 @@ valorP v xs = head [valor x | x <- xs, (fst x) ==v]
 -- >>> valorP x [(x,7),(y,0),(z,3)]
 -- 7
 
--- | Funciones auxiliares para Incremento y Decremento: 
+-- | Función auxiliar para Incremento: 
 
 suma1 :: Variable -> [(Variable, Valor)] -> [Estado]
 suma1 v [] = []
 suma1 v (x':xs) | fst x' == v = (cambiaVal x' (valor x' +1)):xs
                 | otherwise = x': (suma1 v xs)
+
+-- | Función auxiliar para Decremento:
 
 resta1 :: Variable -> [(Variable, Valor)] -> [Estado]
 resta1 v [] = []
@@ -305,10 +314,12 @@ ejecutaP p xs = ejecuta 1 p xs
 -- >>> ejecutaP programaIdentidad [(x,8),(y,0),(z,0)]
 -- (Y,8)
 
--- | Lista de las variables de un programa sin repetir y repetidas.
+-- | Lista de las variables de un programa sin repetir.
 
 variablesDe :: Programa -> [Variable]
 variablesDe (Pr ps) = nub (map (varInstruccion) ps)
+
+-- | Lista de las variables de un programa, repitiéndolas. 
 
 listaVariablesDe :: Programa -> [Variable]
 listaVariablesDe (Pr ps) = map (varInstruccion) ps
