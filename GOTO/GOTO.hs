@@ -76,6 +76,10 @@ esZ _ = False
 -- >>> esZ (VarIn [15])
 -- False
 
+esX :: Variable -> Bool
+esX (VarIn _) = True
+esX _ = False
+
 -- | Definimos las variables (x,y,z) para facilitar su uso en la
 -- definición de programas. 
 
