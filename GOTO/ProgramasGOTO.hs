@@ -1,6 +1,6 @@
 module ProgramasGOTO where
 import GOTO
-import Macros
+import MacrosNew
 
 -- | Programa lineal que devuelve la constante 3 para cualquier variable
 -- de entrada.

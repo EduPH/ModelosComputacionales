@@ -1,4 +1,4 @@
-module MacrosN where
+module MacrosNew where
 import GOTO
 import Data.List 
 
@@ -168,7 +168,7 @@ normInd n is (v:vs) = normInd n [susVar (fst v) (snd v) i | i<- is] vs
 normalizaIndices :: Int -> InstM -> InstM
 normalizaIndices n (Macro e vs' is) = Macro e vs' (normInd n is vs)
     where
-      vs = paresVars n (varTrab is)
+      vs = paresVars n ((varTrab is) \\ vs')
 
 -- | Ejemplos
 -- >>> normalizaIndices 5 (valX (E "" 0))
