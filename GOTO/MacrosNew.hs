@@ -158,7 +158,7 @@ normInd n is [] = is
 normInd n is (v:vs) = normInd n [susVar (fst v) (snd v) i | i<- is] vs
 
 -- | Ejemplos   
--- >>> normInd 5 [IncM z (E "" 0), DecM z (E "" 0), Macro (E "" 0) [IncM z (E "B" 0), DecM z (E "" 0)]] [(z, VarWork [2])]
+-- >>> normInd 5 [IncM z (E "" 0), DecM z (E "" 0), Macro (E "" 0) [] [IncM z (E "B" 0), DecM z (E "" 0)]] [(z, VarWork [2])]
 -- [     Z2<-Z2+1,     Z2<-Z2-1,[B]  Z2<-Z2+1
 --      Z2<-Z2-1]
  
@@ -373,7 +373,7 @@ progM2prog = progM2progAux . normM
 --      Z1<-Z1+1
 --      IF Z1/=0 GOTO [C1]
 -- [B]  X<-X-1
--- >>> let p = Pm [Macro (E "" 0) [IncM x (E "" 0), Macro (E "" 0) [IncM x (E "" 0), Macro (E "" 0) [IncM x (E "" 0)]]]]
+-- >>> let p = Pm [Macro (E "" 0) []  [IncM x (E "" 0), Macro (E "" 0) [] [IncM x (E "" 0), Macro (E "" 0) [] [IncM x (E "" 0)]]]]
 -- >>> progM2prog p
 --      X<-X+1
 --      X<-X+1
