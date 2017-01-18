@@ -59,83 +59,93 @@ producto = Pm [ valV (VarWork [2]) (VarIn [2]) (E "" 0),
 -- | Ejemplos
 -- >>> let p = progM2prog producto
 -- >>> p
---      IF X2/=0 GOTO [B3]
---      Z4<-Z4+1
---      IF Z4/=0 GOTO [C3]
+--      Z2<-Z2-1
+--      IF Z2/=0 GOTO     
+-- [A3] IF X2/=0 GOTO [B3]
+--      Z24<-Z24+1
+--      IF Z24/=0 GOTO [C3]
 -- [B3] X2<-X2-1
---      Z6<-Z6+1
---      Z4<-Z4+1
---      Z4<-Z4+1
---      IF Z4/=0 GOTO     
--- [C3] IF Z4/=0 GOTO [D3]
---      Z4<-Z4+1
---      IF Z4/=0 GOTO [E3]
--- [D3] Z4<-Z4-1
---      X2<-X2+1
---      Z4<-Z4+1
---      IF Z4/=0 GOTO [C3]
--- [B]  IF Z/=0 GOTO [A] 
---      Z7<-Z7+1
---      IF Z7/=0 GOTO [E4]
--- [A]  Z2<-Z2-1
---      IF X1/=0 GOTO [B5]
---      Z8<-Z8+1
---      IF Z8/=0 GOTO [C5]
--- [B5] X1<-X1-1
---      Z9<-Z9+1
---      Z8<-Z8+1
---      Z8<-Z8+1
---      IF Z8/=0 GOTO     
--- [C5] IF Z8/=0 GOTO [D5]
---      Z8<-Z8+1
---      IF Z8/=0 GOTO [E5]
--- [D5] Z8<-Z8-1
---      X1<-X1+1
---      Z8<-Z8+1
---      IF Z8/=0 GOTO [C5]
---      IF Y/=0 GOTO [B6]
---      Z10<-Z10+1
---      IF Z10/=0 GOTO [C6]
--- [B6] Y<-Y-1
---      Z13<-Z13+1
---      Z10<-Z10+1
---      Z10<-Z10+1
---      IF Z10/=0 GOTO     
--- [C6] IF Z10/=0 GOTO [D6]
---      Z10<-Z10+1
---      IF Z10/=0 GOTO [E6]
--- [D6] Z10<-Z10-1
---      Y<-Y+1
---      Z10<-Z10+1
---      IF Z10/=0 GOTO [C6]
--- [B2] IF Z3/=0 GOTO [A2]
+--      Z2<-Z2+1
 --      Z14<-Z14+1
---      IF Z14/=0 GOTO [E9]
+--      Z25<-Z25+1
+--      IF Z25/=0 GOTO [A3]
+-- [C3] IF Z14/=0 GOTO [D3]
+--      Z26<-Z26+1
+--      IF Z26/=0 GOTO [Q3]
+-- [D3] Z14<-Z14-1
+--      X2<-X2+1
+--      Z27<-Z27+1
+--      IF Z27/=0 GOTO [C3]
+-- [B]  IF Z/=0 GOTO [A] 
+--      Z28<-Z28+1
+--      IF Z28/=0 GOTO [E4]
+-- [A]  Z2<-Z2-1
+--      Z1<-Z1-1
+--      IF Z1/=0 GOTO     
+-- [A5] IF X1/=0 GOTO [B5]
+--      Z39<-Z39+1
+--      IF Z39/=0 GOTO [C5]
+-- [B5] X1<-X1-1
+--      Z1<-Z1+1
+--      Z29<-Z29+1
+--      Z40<-Z40+1
+--      IF Z40/=0 GOTO [A5]
+-- [C5] IF Z29/=0 GOTO [D5]
+--      Z41<-Z41+1
+--      IF Z41/=0 GOTO [Q5]
+-- [D5] Z29<-Z29-1
+--      X1<-X1+1
+--      Z42<-Z42+1
+--      IF Z42/=0 GOTO [C5]
+--      Z3<-Z3-1
+--      IF Z3/=0 GOTO     
+-- [A6] IF Y/=0 GOTO [B6]
+--      Z53<-Z53+1
+--      IF Z53/=0 GOTO [C6]
+-- [B6] Y<-Y-1
+--      Z3<-Z3+1
+--      Z43<-Z43+1
+--      Z54<-Z54+1
+--      IF Z54/=0 GOTO [A6]
+-- [C6] IF Z43/=0 GOTO [D6]
+--      Z55<-Z55+1
+--      IF Z55/=0 GOTO [Q6]
+-- [D6] Z43<-Z43-1
+--      Y<-Y+1
+--      Z56<-Z56+1
+--      IF Z56/=0 GOTO [C6]
+-- [B2] IF Z3/=0 GOTO [A2]
+--      Z57<-Z57+1
+--      IF Z57/=0 GOTO [E9]
 -- [A2] Z3<-Z3-1
 --      Z1<-Z1+1
---      Z15<-Z15+1
---      IF Z15/=0 GOTO [B12]
--- [E2] IF Z17/=0 GOTO [B13]
---      Z16<-Z16+1
---      IF Z16/=0 GOTO [C13]
--- [B13] Z17<-Z17-1
+--      Z58<-Z58+1
+--      IF Z58/=0 GOTO [B12]
+-- [E2] Y<-Y-1
+--      IF Y/=0 GOTO [E2]
+-- [A13] IF Z1/=0 GOTO [B13]
+--      Z69<-Z69+1
+--      IF Z69/=0 GOTO [C13]
+-- [B13] Z1<-Z1-1
 --      Y<-Y+1
---      Z16<-Z16+1
---      Z16<-Z16+1
---      IF Z16/=0 GOTO [E2]
--- [C13] IF Z16/=0 GOTO [D13]
---      Z16<-Z16+1
---      IF Z16/=0 GOTO [E13]
--- [D13] Z16<-Z16-1
---      Z17<-Z17+1
---      Z16<-Z16+1
---      IF Z16/=0 GOTO [C13]
---      Z18<-Z18+1
---      IF Z18/=0 GOTO [B14]
--- >>> variablesDe p
--- [X2,Z4,Z6,Z,Z7,Z2,X1,Z8,Z9,Y,Z10,Z13,Z3,Z14,Z1,Z15,Z17,Z16,Z18]
--- >>> let vs = variablesDe p
--- >>> let vs' = [(v,0) | v <- vs, not (esX v)]
--- >>> let vars = vs' ++ [(VarIn [1], 2), (VarIn [2], 4)]
--- >>> vars
--- [(Z4,0),(Z6,0),(Z,0),(Z7,0),(Z2,0),(Z8,0),(Z9,0),(Y,0),(Z10,0),(Z13,0),(Z3,0),(Z14,0),(Z1,0),(Z15,0),(Z17,0),(Z16,0),(Z18,0),(X1,2),(X2,4)]
+--      Z59<-Z59+1
+--      Z70<-Z70+1
+--      IF Z70/=0 GOTO [A13]
+-- [C13] IF Z59/=0 GOTO [D13]
+--      Z71<-Z71+1
+--      IF Z71/=0 GOTO [Q13]
+-- [D13] Z59<-Z59-1
+--      Z1<-Z1+1
+--      Z72<-Z72+1
+--      IF Z72/=0 GOTO [C13]
+--      Z73<-Z73+1
+--      IF Z73/=0 GOTO [B14]
+
+-- | Ejemplos
+-- >>> let p =progM2prog (Pm [(valV y (VarWork [1]) (E "E" 2))])
+-- >>> let vars = [(y,0),(VarWork [1],0),(VarWork [24],0),(VarWork [25],0),(VarWork [14],0),(VarWork [26],0),(VarWork [27],1)]
+-- >>> ejecutaP p vars
+-- (Y,0)
+-- >>> let vars = [(y,0),(VarWork [1],4),(VarWork [24],0),(VarWork [25],0),(VarWork [14],0),(VarWork [26],0),(VarWork [27],1)]
+-- >>> ejecutaP p vars
+-- (Y,4)

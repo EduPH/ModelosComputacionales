@@ -71,17 +71,23 @@ goto e1 e2 = Macro e1 [] [IncM z (E [] 0),
 
 -- | Macro V <- V'.
 
-valV v v' e = Macro e [v,v'] [CondM (E "A" 0) v' (E "B" 0),
-                              goto (E "" 0) (E "C" 0),
+valV v v' e = Macro e [v,v'] [DecM v (E "A" 1),
+                              CondM (E "" 0) v (E "A" 1),
+                              CondM (E "A" 0) v' (E "B" 0),
+                              IncM (VarWork [10]) (E [] 0),
+                              CondM (E [] 0) (VarWork [10]) (E "C" 0),
                               DecM v' (E "B" 0),
                               IncM v  (E "" 0),
                               IncM z  (E "" 0),
-                              goto (E "" 0) (E "A" 0),
+                              IncM (VarWork [11]) (E [] 0),
+                              CondM (E [] 0) (VarWork [11]) (E "A" 0),
                               CondM (E "C" 0) z (E "D" 0),
-                              goto (E "" 0) (E "E" 0),
+                              IncM (VarWork [12]) (E [] 0),
+                              CondM (E [] 0) (VarWork [12]) (E "Q" 0),
                               DecM z  (E "D" 0),
                               IncM v' (E "" 0),
-                              goto (E "" 0) (E "C" 0)] 
+                              IncM (VarWork [13]) (E [] 0),
+                              CondM (E [] 0) (VarWork [13]) (E "C" 0)] 
 
 -----------------------------------------------------------------------
 --
@@ -121,13 +127,13 @@ varsInstM :: InstM -> [Variable]
 varsInstM (IncM v _) = [v]
 varsInstM (DecM v _) = [v]
 varsInstM (CondM e v e') = [v]
-varsInstM (Macro e vs is) = concat ( map (varsInstM ) is) \\ vs
+varsInstM (Macro e vs is) = nub (concat ( map (varsInstM ) is) ) \\ vs
 
 -- | Ejemplos
 -- >>> varsInstM (IncM x (E "" 0))
 -- [X]
 -- >>> varsInstM (valX (E "" 0))
--- [X,Z,Z,X,Y,X]
+-- [X,Z,Y]
 
 -- | La función (varTrab is) calcula la lista de las variables de
 -- trabajo de una lista de instrucciones. 
@@ -178,6 +184,22 @@ normalizaIndices n (Macro e vs' is) = Macro e vs' (normInd n is vs)
 -- [A]  X<-X-1
 --      Y<-Y+1
 --      IF X/=0 GOTO [A] 
+-- >>> normalizaIndices 5 (valV  z (VarWork [2]) (E "" 0))
+-- [A]  IF Z2/=0 GOTO [B] 
+--      Z<-Z+1
+--      IF Z/=0 GOTO [C] 
+-- [B]  Z2<-Z2-1
+--      Z<-Z+1
+--      Z<-Z+1
+--      Z<-Z+1
+--      IF Z/=0 GOTO [A] 
+-- [C]  IF Z/=0 GOTO [D] 
+--      Z<-Z+1
+--      IF Z/=0 GOTO [E] 
+-- [D]  Z<-Z-1
+--      Z2<-Z2+1
+--      Z<-Z+1
+--      IF Z/=0 GOTO [C] 
 
 -- | La función (esM m) determina si m es una macro.
 
