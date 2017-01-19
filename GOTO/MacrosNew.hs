@@ -78,13 +78,13 @@ valV v v' e = Macro e [v,v'] [DecM v (E "A" 1),
                               CondM (E [] 0) (VarWork [10]) (E "C" 0),
                               DecM v' (E "B" 0),
                               IncM v  (E "" 0),
-                              IncM z  (E "" 0),
+                              IncM (VarWork [14])  (E "" 0),
                               IncM (VarWork [11]) (E [] 0),
                               CondM (E [] 0) (VarWork [11]) (E "A" 0),
-                              CondM (E "C" 0) z (E "D" 0),
+                              CondM (E "C" 0) (VarWork [14]) (E "D" 0),
                               IncM (VarWork [12]) (E [] 0),
                               CondM (E [] 0) (VarWork [12]) (E "Q" 0),
-                              DecM z  (E "D" 0),
+                              DecM (VarWork [14])  (E "D" 0),
                               IncM v' (E "" 0),
                               IncM (VarWork [13]) (E [] 0),
                               CondM (E [] 0) (VarWork [13]) (E "C" 0)] 
@@ -342,7 +342,8 @@ noEsVacia _ = True
 
 normEtMAux :: InstM -> InstM
 normEtMAux (Macro e vs ins@(i:is)) 
-    | noEsVacia (head (etiquetaM i)) =
+    | not (noEsVacia e) = Macro e vs ins
+    | noEsVacia (head (etiquetaM i)) && noEsVacia e =
        Macro e vs (map (susEt (head (etiquetaM i)) e) ins )
     | otherwise = Macro e vs ((susEt (head (etiquetaM i)) e i):is)
 normEtMAux i = i
