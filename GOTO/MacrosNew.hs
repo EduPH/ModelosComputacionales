@@ -87,7 +87,8 @@ valV v v' e = Macro e [v,v'] [DecM v (E "A" 1),
                               DecM (VarWork [14])  (E "D" 0),
                               IncM v' (E "" 0),
                               IncM (VarWork [13]) (E [] 0),
-                              CondM (E [] 0) (VarWork [13]) (E "C" 0)] 
+                              CondM (E [] 0) (VarWork [13]) (E "C" 0),
+                              IncM (VarWork [15]) (E "Q" 0)] 
 
 -----------------------------------------------------------------------
 --
@@ -112,7 +113,7 @@ susVar v1 v (Macro e vs is) = Macro e vs (aux is)
     where
       aux [i] = [susVar v1 v i]
       aux (i:is) = (susVar v1 v i): aux is
-
+susVar v1 v (SKIPM e) = SKIPM e
 -- | Ejemplos
 -- >>> IncM x (E "" 0)
 --      X<-X+1
@@ -128,6 +129,7 @@ varsInstM (IncM v _) = [v]
 varsInstM (DecM v _) = [v]
 varsInstM (CondM e v e') = [v]
 varsInstM (Macro e vs is) = nub (concat ( map (varsInstM ) is) ) \\ vs
+varsInstM (SKIPM e) = []
 
 -- | Ejemplos
 -- >>> varsInstM (IncM x (E "" 0))
@@ -266,7 +268,8 @@ susEt e e' (Macro e1 vs is) = Macro e1 vs (aux is)
     where
       aux [i] = [susEt e e' i]
       aux (i:is) = (susEt e e' i): aux is
-
+susEt e e' (SKIPM e1) | e1 == e = SKIPM e'
+                      | otherwise = SKIPM e1
 -- | La función (paresEt n es) calcula a partir de una lista de
 -- etiquetas es, pares formados por la etiqueta y su normalizada. 
 
@@ -402,4 +405,44 @@ progM2prog = progM2progAux . normM
 --      X<-X+1
 --      X<-X+1
 
-
+-- | Ejemplo
+-- >>> let p = progM2prog (Pm [valV z x (E "" 0)  ,valV y z (E "" 0) ])
+-- >>> p
+-- [A3] Z<-Z-1
+--      IF Z/=0 GOTO [A3]
+-- [A2] IF X/=0 GOTO [B2]
+--      Z26<-Z26+1
+--      IF Z26/=0 GOTO [C2]
+-- [B2] X<-X-1
+--      Z<-Z+1
+--      Z30<-Z30+1
+--      Z27<-Z27+1
+--      IF Z27/=0 GOTO [A2]
+-- [C2] IF Z30/=0 GOTO [D2]
+--      Z28<-Z28+1
+--      IF Z28/=0 GOTO [Q2]
+-- [D2] Z30<-Z30-1
+--      X<-X+1
+--      Z29<-Z29+1
+--      IF Z29/=0 GOTO [C2]
+-- [Q2] Z31<-Z31+1
+-- [A5] Y<-Y-1
+--      IF Y/=0 GOTO [A5]
+-- [A4] IF Z/=0 GOTO [B4]
+--      Z42<-Z42+1
+--      IF Z42/=0 GOTO [C4]
+-- [B4] Z<-Z-1
+--      Y<-Y+1
+--      Z46<-Z46+1
+--      Z43<-Z43+1
+--      IF Z43/=0 GOTO [A4]
+-- [C4] IF Z46/=0 GOTO [D4]
+--      Z44<-Z44+1
+--      IF Z44/=0 GOTO [Q4]
+-- [D4] Z46<-Z46-1
+--      Z<-Z+1
+--      Z45<-Z45+1
+--      IF Z45/=0 GOTO [C4]
+-- [Q4] Z47<-Z47+1
+-- >>> ejecutaP p [(z,0),(x,7),(VarWork [26],0),(VarWork [30],0),(VarWork [27],0),(VarWork [28],0),(VarWork [29],0),(VarWork [31],0),(VarWork [42],0),(VarWork [46],0),(VarWork [43],0),(VarWork [44],0),(VarWork [45],0),(VarWork [47],0),(y,0)]
+-- (Y,7)
