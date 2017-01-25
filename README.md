@@ -7,10 +7,7 @@ Este proyecto pretende implementar distintos modelos computacionales en el lengu
 
 ## Estado del proyecto
 
-El proyecto se encuentra en un estado completamente inicial. 
-
-### implementación del lenguaje GOTO
-### Ampliación de GOTO con macros (Pendiente)
+Se ha implementado el lenguaje GOTO, así como las macros y su expansión. Adems de la ejecución de programas. También se incluye un texto para la comprensión de los autómatas con pila. 
 
 ## Motivación
 
