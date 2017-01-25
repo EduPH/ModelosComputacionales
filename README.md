@@ -16,7 +16,7 @@ El proyecto se encuentra en un estado completamente inicial.
 
 Como alumno de la asignatura de Ciencias de la computación impartida en la facultad de matemáticas pretendo tanto mi aprendizaje, como aportar código libre en este aspecto.
 
-## Lenguaje GOTO [(Acceso a la carpeta GOTO)](https://github.com/EduPH/ModelosComputacionales/tree/master/GOTO)
+## Lenguaje [GOTO](https://github.com/EduPH/ModelosComputacionales/tree/master/GOTO)
 
 El lenguaje GOTO es un modelo secuencial, determinista con conjunto de datos en los naturales. Está compuesto por:
 
@@ -26,11 +26,8 @@ El lenguaje GOTO es un modelo secuencial, determinista con conjunto de datos en 
 
 Se denota un programa como un conjunto de instrucciones.
 
-En proceso: Definición de tipos de datos, ejecución de los datos.
-Futuro: Añadir macros.
-
-## Primitivas recursivas (Pendiente)
-
 ## Simulador de máquinas de Turing (Pendiente)
 
-## Máquinas RAM (Pendiente)
+## Autómatas
+
+[Texto autómatas con pila](https://github.com/EduPH/ModelosComputacionales/tree/master/AutomatasPila)
