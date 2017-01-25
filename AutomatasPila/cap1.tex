@@ -1,0 +1,247 @@
+\chapter{Definición de autómatas de pila}
+
+Hemos trabajado con autómatas finitos de distintos tipos, y en este trabajo se pretende extender el concepto de autómata finito para eliminar la restricción sobre la finitud de la memoria que tienen los dados en clase. Con este objetivo, se tratan los autómatas con pila. Una pila es, de manera intuitiva, como una caja en la que se amontona información. La información se ordena por antigüedad, quedando la más reciente arriba. Los autómatas con pila pueden aceptar una palabra por estado final o por pila vacía. Primero trabajaremos con el autómata que acepta por pila vacía. Procedemos a dar una definición formal:
+
+\begin{Def}
+Un \textbf{autómata finito con pila} es una $6$-upla $AFS=(Q,\Sigma,\Gamma, \delta , q_0, Z_0)$ tal que:
+\begin{itemize*}
+\item $Q$ es el conjunto de estados.
+\item $\Sigma$ es el alfabeto  de entrada.
+\item $\Gamma $ es el alfabeto de la pila.
+\item $\delta $ es la función de transición ,
+$$\delta : Q \times \Sigma \times \Gamma \mapsto Q\times \Gamma^* $$
+\item $q_0$ es el estado inicial.
+\item $Z_0$ es el símbolo en el fondo de la pila.
+\end{itemize*}
+\end{Def}
+
+\vspace{5mm}
+
+Las reglas a través de las que funciona un AFS se pueden resumir de la siguiente manera:
+
+\begin{enumerate}
+\item El AFS suspende su funcionamiento si la pila está vacía. Para marcar el fondo de la pila se emplea un símbolo especial.
+\item Se comienza con una configuración inicial en la pila. 
+\item La máquina empieza a funcionar en un cierto estado inicial. 
+\item El funcionamiento del AFS está dado por una terna $(q_i,a,Z)$, que especifica dado un estado, un símbolo de entrada, y un símbolo en el tope de la pila, al estado al que debe transferirse y la cadena por la que debe sustituirse el símbolo en el tope de la pila. 
+\item Si la terna $(q_i,a,Z)$ no está especificado en el AFS, éste interrumpirá la operación. 
+\item El AFS acepta una cadena si al interrumpir su operación despues de haber examinado toda la cadena de entrada, termina con la pila vacía. 
+\end{enumerate}
+
+\begin{nota}
+$\delta (q,a,Z) \supset (p,\gamma)$ indica que si al estar funcionando el AFS, el símbolo $a$ es el siguiente a leer en la cadena de entrada y el símbolo $Z$ se encuentra en el tope de la pila, el AFS pasa al estado $p$ y el símbolo $Z$ se sustituye por la cadena $\gamma $. Si $\gamma = \varepsilon $, quiere decir que se elimina $Z$ del tope de la pila. 
+\end{nota}
+
+
+
+Por otro lado, podemos tomar otro criterio de aceptación, hablamos de aquellos autómatas que terminan en estado final con la cadena de entrada agotada. Para ello, damos una definición de las configuraciones.
+\begin{Def}
+Sean $\Sigma $ el alfabeto de entrada y $\Gamma $ el alfabeto de símbolos válidos en la pila. Una \textbf{configuración} en un AFS es una $3$-upla $(q,aw,Z\gamma )$ donde $q$ es el estado en el que se encuentra el AFS, $aw$ es la cadena que le falta por procesar, de la cual $a$ es el símbolo que está viendo, $a\in \Sigma $ o bien $\varepsilon, w \in \Sigma^*$ y $Z\gamma $ es el contenido de la pila, del cual $Z$ es el símbolo en el tope de la pila, $Z\in \Gamma$ o bien $\varepsilon, \gamma \in \Gamma^*$. 
+\end{Def}
+
+\begin{Def}
+Un \textbf{autómata finito de pila} (AFS) P que acepta \underline{por estado final} es un sistema
+$$P=(Q,\Sigma,\Gamma, \delta , q_0,Z_0,F)$$
+donde: 
+\begin{itemize*}
+\item $Q$ es un conjunto finito de estados.
+\item $\Sigma $ es un alfabeto llamado alfabeto de entrada.
+\item $\Gamma $ es un alfabeto, llamado alfabeto de la pila.
+\item $q_0\in Q$ es el estado inicial.
+\item $Z_0$ es el símbolo en el fondo de la pila al empezar a funcionar en el AFS.
+\item $F\subseteq Q$ es el conjunto de estados finales.
+\item $\delta $ es la función de transición, definida como:
+$$ \delta: Q \times \Sigma \cup \{\varepsilon \} \times \Gamma \rightarrow \mathcal{P}(Q \times \Gamma^*)$$
+
+\end{itemize*}
+\end{Def}
+
+\begin{nota}
+$\delta (q,a,Z) = \{(p_1,\gamma_1),(p_2,\gamma_2),\dots , (p_m,\gamma_m)\}$ indica que, estando en el estado $q$ con el símbolo de entrada $a$ al frente de la cadena de entrada y $Z$ en el tope de la pila, se pasa simultáneamente a los estados $p_1,\dots , p_m$, se consume un símbolo, avanza la cabeza lectora a través de la cadena de entrada, se quita $Z$ del tope de la pila y en cada estado $p_j$ se coloca $\gamma_j$ en el tope de la pila. Si $a=\varepsilon $, la cabeza lectora no avanzaría. Si $\gamma_j=\varepsilon$, entonces se elimina el símbolo en el tope de la pila. 
+\end{nota}
+
+\begin{nota}
+Cuando se agrega más de un símbolo a la pila en una sola transición se dice que el funcionamiento del AFS es \underline{extendido}. 
+\end{nota}
+
+Ahora establecemos la notación para el proceso de reconocimiento de las configuraciones:
+
+\begin{itemize*}
+\item \framebox{$(q,aw,Z\gamma ) \vdash_P (p,w,\beta \gamma )$} si $\delta(q,a,Z)\supset (p,\beta )$
+\item \framebox{$(q,x,\alpha ) \vdash_P^* (p,w,\beta )$} si se puede llegar de la configuración $(q,x,\alpha)$ a la configuración $(p,w,\beta)$ en cero o más pasos. 
+\item \framebox{$(q,x,\alpha ) \vdash_P^+ (p,w,\beta )$} si se puede llegar de la configuración $(q,x,\alpha)$ a la configuración $(p,w,\beta )$ en uno o más pasos. 
+\item \framebox{$(q,x,\alpha ) \vdash_P^k (p,w,\beta )$} si se puede llegar de la configuración $(q,x,\alpha)$ a la configuración $(p,w,\beta )$ en exactamente $k$ pasos. 
+\end{itemize*}
+
+
+\begin{nota}
+Se puede omitir $P$ bajo el símbolo $\vdash$ si se sobreentiende el autómata con el que se trabaja. 
+\end{nota}
+\begin{Def}
+$L(M)$ \textbf{lenguaje aceptado por estado final}:
+$$ L(M) = \{ w\in \Sigma^* | (q_0,w,Z_0) \vdash_* (p,\varepsilon, \gamma ) \text{ para } p \in F \text{ y } \gamma \in \Gamma^* \} $$
+y $N(M)$ \textbf{lenguaje aceptado por pila vacía}:
+$$N(M)= \{ w\in \Sigma^* | (q_0,w,Z_0)\vdash_* (p,\varepsilon, \varepsilon ), p\in Q\} $$
+\end{Def}
+
+
+\chapter{Relación entre los tipos de aceptación}
+
+Ambos modelos de aceptación, por pila vacía o por estado final son equivalentes. Como se prueba en los siguientes teoremas:
+
+\begin{Teo}
+Si $L$ es $L(M_2)$ para algún AFS $M_2$ que acepta por estado final, entonces $L$ es $N(M_1)$ para algún AFS $M_1$ que acepta por pila vacía.
+\end{Teo}
+
+\begin{Dem}
+Sea $L$ un lenguaje aceptado por estado final por un AFS $M_2=(Q,\Sigma, \gamma, \delta, q_0, Z_0,F)$. Debemos construir un autómata $M_1 = (Q_1,\Sigma, \Gamma_1, \delta_1,q'_0,X_0,\emptyset )$ que acepta por pila vacía. 
+$$\delta_1(q,a,Z)=\delta (q,a,Z) \text{ para } a\in \Sigma,Z\in \Gamma $$
+y agregamos
+$$\delta_1(q,\varepsilon, Z) \supset (q_e,Z) \text{ para } q\in F,Z\in \Gamma \text{ y } \delta_1(q_e,\varepsilon, Z)=(q_e,\varepsilon ) \text{ para } Z\in \Gamma_1$$
+
+Si se da el caso que $M_2$ queda con la pila vacía pero no en estado final, dicha cadena no es aceptada por $M_2$. Para evitar que $M_1$ la acepte, marcamos el fondo de la pila con un símbolo que $M_2$ no manipule. De esta forma, al terminar $M_2$ con pila vacía, $M_1$ no la tiene vacía, ya que la única forma de eliminar dicha marca es en el estado $q_e$. Así, se agrega $q_0'$ un nuevo estado inicial para $M_1$ con la transición $\delta_1(q_0',\varepsilon, X_0)=(q_0,Z_0X_0)$. Formalmente:
+
+\begin{itemize*}
+\item $Q_1=Q\cup \{q_0',q_e\}$
+\item $\Sigma_1=\Sigma $
+\item $\Gamma_1=\Gamma \cup \{X_0\}$ tal que $X_0\notin \Gamma $
+\end{itemize*}
+$\delta_1$ está definida de la siguiente manera:
+\begin{enumerate}
+\item $\delta_1(q_0',\varepsilon, X_0)=(q_0,Z_0X_0)$
+\item $\delta_1 (q,a,Z)$ incluye a los elementos de $\delta (q,a,Z), \forall q\in Q, a \in \Sigma $ ó $a= \varepsilon, $ y $Z\in \Gamma$. 
+\item $\forall q \in F, \forall Z\in \Gamma\cup \{X_0\},\delta_1(q,\varepsilon, Z)\supset (q_e,\varepsilon)$.
+\item $\forall Z\in \Gamma \cup \{ Z_0 \}, \delta_1 (q_e,\varepsilon, Z) \supset (q_e,\varepsilon)$.
+\end{enumerate}
+
+Falta probar que $L(M_2)=N(M_1)$. Sea $x\in L(M_2)$. Entonces,
+$$ (q_0,x,Z_0)\vdash_{M_2}^* (p,\varepsilon, \gamma) \text{ con } p\in F \text{ y } \gamma \in \Gamma^*$$
+
+Veamos ahora lo que sucede con $M_1$,
+$$(q_0',x,X_0) \vdash_{M_1} (q_0,x,Z_0X_0)$$
+Como $x\in L(M_2)$, ninguna transición que efectúe $M_2$ vacía la pila antes de agotar la cadena de entrada. Como todas las transiciones de $M_2$ están en $M_1$, se pueden utilizar las transiciones
+$$ (q_0,x,Z_0X_0)\vdash^*_{M_1} (p,\varepsilon, \gamma X_0)$$
+Como $p$ es estado final, tenemos la transición
+$$\delta(\varepsilon,Z)\supset (q_e,Z)$$
+por lo que podemos tener lo siguiente:
+$$(p,\varepsilon, \gamma_1 X_0)\vdash_{M_1}^* (q_e,\varepsilon, \gamma_2 X_0)\vdash_{M_1}^* (q_e,\varepsilon, \varepsilon )$$
+Por lo tanto, $x\in N(M_1)$. 
+
+Recíprocamente, si $x\in N(M_1)$, tenemos que probar que es aceptada por $L(M_2)$. 
+\begin{enumerate}
+\item En el estado inicial se deja en el tope de la pila el símbolo $Z_0$ de $M_2$. 
+\item Se ejecutan las reglas que se mantuvieron iguales en ambos autómatas.
+\item LLegado al estado final de $M_2$, se pasa al estado $q_e$.
+\end{enumerate}
+
+Como $x$ es aceptada por $M_1$, es decir, por pila vacía, por construcción eso implica que se ha llegado al estado final de $M_2$, pues en caso contrario no se vaciaría la pila, y por lo tanto, que $x\in L(M_2)$. 
+\qed
+
+\end{Dem}
+
+\begin{Teo}
+Si $L$ es un $N(M_1)$ para algún AFS que acepta por pila vacía, entonces $L$ es $L(M_2)$ para algún autómata $M$ que acepta por estado final. 
+\end{Teo}
+
+\begin{Dem}
+Adoptamos la estrategia de colocar un símbolo en el fondo de la pila, de forma que cuando $M_2$ encuentre dicho símbolo pase a su estado final, y así imite el comportamiento de $M_1$.
+
+Formalmente, sea $M_1=(Q,\Sigma,\Gamma,\delta,q_0,X_0,\emptyset )$ tal que $L=N(M_1)$. Construimos
+$$M_2=(Q\cup \{ q_0',q_f\},\Sigma, \Gamma \cup \{Z_0 \},\delta ',q_0',Z_0,\{q_f\})$$
+con $\delta '$ definida como sigue:
+\begin{enumerate}
+\item $\delta ' (q_0',\varepsilon, Z_0)=(q_0,X_0Z_0)$.
+\item $\delta ' (q,a,Z)=\delta (q,a,Z), \forall q\in Q,\forall a \in \Sigma, \forall Z\in \Gamma$.
+\item $\delta ' (q,\varepsilon, Z_0)\supset (q_f,\varepsilon ), \forall q \in Q$. 
+\end{enumerate}
+
+Sea $x\in N(M_1)$, hay que probar que $x\in L(M_2)$ para luego probar el recíproco y así tener la igualdad. 
+
+\begin{enumerate}
+\item El estado inicial sitúa una marca al fondo de la pila.
+\item Como $x\in N(M_1)$ recorre las transiciones que tienen ambos autómatas en común, llegando a dejar la pila en la marca añadida en el estado inicial.
+\item Se pasa al estado final. 
+\end{enumerate}
+Por lo tanto, $x$ es aceptada por $M_2$.
+
+Recíprocamente, que $x$ sea aceptada por $M_2$ quiere decir que se ha llegado al estado final, es decir, que se llega a la marca puesta en el estado inicial, y por lo tanto, se ha vaciado la pila a través de las transiciones comunes entre ambos autómatas, lo que implica que $x$ es aceptada por $M_1$, teniendo $N(M_1)=L(M_2)$. 
+\qed
+\end{Dem}
+
+
+\chapter{Ejemplos}
+\begin{ex}
+AFS que reconoce $a^nb^n$ por pila vacía. 
+\begin{center}
+\begin{tabular}{|l|c|c|c|}
+\hline 
+$Q$ & $\Gamma $ & \multicolumn{2}{|c|}{$\Sigma $} \\ \cline{3-4}
+ & & $a$ & $b$ \\ \hline
+$q_0$ & $Z_0$ & $q_0,A$ & \\ \cline{2-4}
+ & $A$ & $q_0,AA$ & $q_1,\varepsilon $ \\ \hline
+$q_1$ & $Z_0$ &  & \\ \cline{2-4}
+ & $A$ &  & $q_1,\varepsilon $ \\ \hline
+\end{tabular}
+\end{center}
+Su funcionamiento es sencillo. Cada vez que lea una $a$ coloca una $A$ en la pila. Cuando lee una $b$, saca una $A$ de la pila. Por lo tanto, acepta el lenguaje si terminamos con la pila vacía, es decir, mete tantas $A$ como las que saca de la pila, que se traduce en que haya tantas $a$ como $b$, siendo el lenguaje aceptado $L=\{a^nb^n | n>0\}$.
+
+Mostramos a continuación las configuraciones al reconocer la cadena $aaabbb$
+
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Configuración} & \textbf{Regla} \\ \hline
+$(q_1,aaabbb,Z)$ & $\delta(q_1,a,Z)=(q_1,A)$ \\ \hline
+$(q_1,aabbb,A)$ & $\delta(q_1,a,A) = (q_1,AA)$ \\ \hline
+$(q_1,abbb,AA)$ & $\delta(q_1,a,A)=(q_1,AA)$ \\ \hline
+$(q_1,bbb,AAA)$ & $\delta(q_1,b,A)=(q_2,\varepsilon)$ \\ \hline
+$(q_2,bb,AA)$ & $\delta(q_2,b,A)=(q_2,\varepsilon)$ \\ \hline
+$(q_2,b,A)$ & $\delta(q_2,b,A)=(q_2,\varepsilon)$ \\ \hline
+$(q_2,\varepsilon, \varepsilon )$ & \\ \hline
+\end{tabular}
+\end{center}
+\end{ex}
+
+\newpage
+\begin{ex}
+Autómata que reconoce paréntesis bien anidados por estado final. 
+\begin{center}
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline 
+$Q$ & $\Gamma $ & \multicolumn{2}{|c|}{$\Sigma $} & $\varepsilon$ & $F$ \\ \cline{3-4}
+ & & $($ & $)$ & & \\ \hline
+$q_0$ & $Z_0$ & $q_0,IZ_0$ & $q_E,Z_0$& $q_f,Z_0$ & $0$ \\ \cline{2-5}
+ & $I$ & $q_0,II$ & $q_0,\varepsilon $ & &  \\ \hline
+$q_f$ & $Z_0$ & & & & 1 \\ \cline{2-5}
+& $I$ & & & & \\ \hline
+$q_E$ & $Z_0$& & & & 0 \\ \cline{2-5}
+& $I$ & & & &  \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{nota}
+$q_E$ es el que denotaremos estado de error. 
+\end{nota}
+
+La idea intuitiva del funcionamiento del autómata es la siguiente. Introduce  el símbolo $I$ en la pila cuando se abre un paréntesis, y lo elimina cuando cierra. Si se queda abierto y termina la entrada o la pila, llega al estado de error. Si vacía la cadena y permanece en $q_0$, entonces llega al estado final, termina y acepta.
+ 
+A continuación, mostramos la tabla de configuraciones con las reglas empleadas al reconocer $()((())())$:
+
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Configuración} & \textbf{Regla} \\ \hline
+$(q_0,()((())()),Z_0)$ & $\delta(q_0,(,Z_0)=(q_0,IZ_0)$ \\ \hline
+$(q_0,)((())()),IZ_0)$ & $\delta(q_0,),I) = (q_0,\varepsilon)$ \\ \hline
+$(q_0,((())()),Z_0)$ & $\delta(q_0,(,Z_0)=(q_0,IZ_0)$ \\ \hline
+$(q_0,(())()),IZ_0)$ & $\delta(q_0,(,I)=(q_0,II)$ \\ \hline
+$(q_0,())()),IIZ_0)$ & $\delta(q_0,(,I)=(q_0,II)$ \\ \hline
+$(q_0,))()),IIIZ_0)$ & $\delta(q_0,),I)=(q_0,\varepsilon)$ \\ \hline
+$(q_0,)()),IIZ_0)$ & $\delta(q_0,),I)=(q_0,\varepsilon)$ \\ \hline
+$(q_0,()),IZ_0)$ & $\delta(q_0,(,I)=(q_0,II)$ \\ \hline
+$(q_0,)),IIZ_0)$ & $\delta(q_0,),I)=(q_0,\varepsilon)$ \\ \hline
+$(q_0,),IZ_0)$ & $\delta(q_0,),I)=(q_0,\varepsilon)$ \\ \hline
+$(q_0,\varepsilon,Z_0)$ & $\delta(q_0,\varepsilon,Z_0)=(q_f,Z_0)$ \\ \hline
+\end{tabular}
+\end{center}
+\end{ex}
