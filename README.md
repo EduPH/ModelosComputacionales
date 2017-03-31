@@ -25,6 +25,3 @@ Se denota un programa como un conjunto de instrucciones.
 
 ## Simulador de máquinas de Turing (Pendiente)
 
-## Autómatas
-
-[Texto autómatas con pila](https://github.com/EduPH/ModelosComputacionales/tree/master/AutomatasPila)
